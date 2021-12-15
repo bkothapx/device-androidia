@@ -1,0 +1,63 @@
+From defeac80c739934e948d9d5670ce88dc2f3f2bdf Mon Sep 17 00:00:00 2001
+From: Basanagouda Koppad <basanagoudax.n.koppad@intel.com>
+Date: Thu, 16 Dec 2021 13:18:05 +0530
+Subject: [PATCH] Configure sensor dyanmic configuration based on mixins
+
+Tracked-On: OAM-100384
+Signed-off-by: Basanagouda Koppad <basanagoudax.n.koppad@intel.com>
+
+diff --git a/sensors/2.0/Android.bp b/sensors/2.0/Android.bp
+index 50f8597..30743fe 100644
+--- a/sensors/2.0/Android.bp
++++ b/sensors/2.0/Android.bp
+@@ -12,10 +12,26 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++soong_config_module_type {
++        name: "senPlugin_cc_defaults",
++        module_type: "cc_defaults",
++        config_namespace: "senPlugin",
++        bool_variables: ["MEDIATION_HAL_DISABLE_STATIC_SENSOR_LIST"],
++        properties: ["cflags", "srcs"],
++    }
++
++senPlugin_cc_defaults {
++        name: "senPlugin_defaults",
++        soong_config_variables: {
++            MEDIATION_HAL_DISABLE_STATIC_SENSOR_LIST: {
++                cflags: ["-DDISABLE_STATIC_SENSOR_LIST"],
++                },
++            },
++    }
+ 
+ cc_binary {
+     name: "android.hardware.sensors@2.0-service.intel",
+-    defaults: ["hidl_defaults"],
++    defaults: ["senPlugin_defaults"],
+     vendor: true,
+     relative_install_path: "hw",
+ 
+diff --git a/sensors/2.0/iiohal_mediation_v2.0/Sensors.h b/sensors/2.0/iiohal_mediation_v2.0/Sensors.h
+index 933d7c0..dc26d00 100644
+--- a/sensors/2.0/iiohal_mediation_v2.0/Sensors.h
++++ b/sensors/2.0/iiohal_mediation_v2.0/Sensors.h
+@@ -64,6 +64,7 @@ struct Sensors : public ISensorsInterface, public ISensorsEventCallback {
+           mReadWakeLockQueueRun(false),
+           mAutoReleaseWakeLockTime(0),
+           mHasWakeLock(false) {
++#ifndef DISABLE_STATIC_SENSOR_LIST
+         AddSensor<AccelSensor>();
+         AddSensor<GyroSensor>();
+         AddSensor<MagnetometerSensor>();
+@@ -73,6 +74,7 @@ struct Sensors : public ISensorsInterface, public ISensorsEventCallback {
+         AddSensor<GeomagnaticRotationVector>();
+         AddSensor<OrientationSensor>();
+         AddSensor<InclinometerSensor>();
++#endif
+     }
+ 
+     virtual ~Sensors() {
+-- 
+2.34.1
+
