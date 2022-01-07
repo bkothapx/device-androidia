@@ -1,4 +1,4 @@
-From cf6e5a1c609a462bd82ab7c006db66fd10d4a27f Mon Sep 17 00:00:00 2001
+From 77df4d3234aaf4e619a0dd0da78be84d6ad6d3e0 Mon Sep 17 00:00:00 2001
 From: Xiao He <xiao.he@intel.com>
 Date: Wed, 25 Nov 2020 21:19:10 +0800
 Subject: [PATCH] SDE/FRP: vm-manager: start_civ.sh changes
@@ -9,8 +9,8 @@ Subject: [PATCH] SDE/FRP: vm-manager: start_civ.sh changes
 Signed-off-by: Xiao He <xiao.he@intel.com>
 ---
  scripts/start_civ.sh       |  19 +++++
- scripts/start_flash_usb.sh | 141 ++++++++++++++++++++++++++-----------
- 2 files changed, 120 insertions(+), 40 deletions(-)
+ scripts/start_flash_usb.sh | 151 ++++++++++++++++++++++++++-----------
+ 2 files changed, 125 insertions(+), 45 deletions(-)
 
 diff --git a/scripts/start_civ.sh b/scripts/start_civ.sh
 index 86287c8..89d34a0 100755
@@ -64,10 +64,10 @@ index 86287c8..89d34a0 100755
      cleanup_battery_mediation
      cleanup_pt_pci
 diff --git a/scripts/start_flash_usb.sh b/scripts/start_flash_usb.sh
-index 573ca33..47aba33 100755
+index 7beb60d..bf5d723 100755
 --- a/scripts/start_flash_usb.sh
 +++ b/scripts/start_flash_usb.sh
-@@ -7,60 +7,121 @@
+@@ -7,73 +7,134 @@
  
  WORK_DIR=$PWD
  
@@ -197,12 +197,30 @@ index 573ca33..47aba33 100755
 -[ -d "./flashfiles_decompress" ] && rm -rf "./flashfiles_decompress"
 -mkdir ./flashfiles_decompress
 -unzip $1 -d ./flashfiles_decompress
++[ -d "$WORK_DIR/flashfiles_decompress" ] && rm -rf "$WORK_DIR/flashfiles_decompress"
++mkdir $WORK_DIR/flashfiles_decompress
++unzip $1 -d $WORK_DIR/flashfiles_decompress
+ 
+ G_size=$((1<<32))
+-for i in `ls ./flashfiles_decompress`;do
+-	if [ -f "./flashfiles_decompress/"$i ] && [ "`grep $i ./flashfiles_decompress/installer.cmd`" ]; then
+-		size=$(stat -c %s "./flashfiles_decompress/"$i)
++for i in `ls $WORK_DIR/flashfiles_decompress`;do
++	if [ -f "$WORK_DIR/flashfiles_decompress/"$i ] && [ "`grep $i $WORK_DIR/flashfiles_decompress/installer.cmd`" ]; then
++		size=$(stat -c %s "$WORK_DIR/flashfiles_decompress/"$i)
+ 		if [[ $size -gt $G_size ]]; then
+ 			echo "Split $i due to its size bigger than 4G\n"
+-			split --bytes=$((G_size-1)) --numeric-suffixes "./flashfiles_decompress/"$i "./flashfiles_decompress/"$i.part
+-			rm "./flashfiles_decompress/"$i
++			split --bytes=$((G_size-1)) --numeric-suffixes "$WORK_DIR/flashfiles_decompress/"$i "$WORK_DIR/flashfiles_decompress/"$i.part
++			rm "$WORK_DIR/flashfiles_decompress/"$i
+ 		fi
+ 	fi
+ done
+ 
 -dd if=/dev/zero of=./flash.vfat bs=63M count=160
 -mkfs.vfat ./flash.vfat
 -mcopy -i flash.vfat flashfiles_decompress/* ::
-+[ -d "$WORK_DIR/flashfiles_decompress" ] && rm -rf "$WORK_DIR/flashfiles_decompress"
-+mkdir $WORK_DIR/flashfiles_decompress
-+unzip $FLASH_FILES -d $WORK_DIR/flashfiles_decompress
 +dd if=/dev/zero of=$WORK_DIR/flash.vfat bs=63M count=160
 +mkfs.vfat $WORK_DIR/flash.vfat
 +mcopy -i $WORK_DIR/flash.vfat $WORK_DIR/flashfiles_decompress/* ::
@@ -210,7 +228,7 @@ index 573ca33..47aba33 100755
  if [ "$support_dedicated_data" = true ]
  then
 -	[ ! -d "./userdata" ] && mkdir ./userdata
-+	[ ! -d "$WORK_DIR/userdata" ] && mkdir ./userdata
++	[ ! -d "$WORK_DIR/userdata" ] && mkdir $WORK_DIR/userdata
  	if [[ $(id -u) = 0 ]]
  	then
 -		data_image=./userdata/$SUDO_USER.img
@@ -227,7 +245,7 @@ index 573ca33..47aba33 100755
  [ ! -f $ovmf_file ] && ovmf_file="/usr/share/qemu/OVMF.fd"
  
  #start software Trusted Platform Module
-@@ -77,10 +138,10 @@ qemu-system-x86_64 \
+@@ -90,10 +151,10 @@ qemu-system-x86_64 \
    -chardev socket,id=charserial0,path=./kernel-console,server,nowait \
    -device isa-serial,chardev=charserial0,id=serial0 \
    -device qemu-xhci,id=xhci,addr=0x5 \
