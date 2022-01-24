@@ -1,26 +1,14 @@
-From cc2e38876d51e99a50042af8373368a1d827a96e Mon Sep 17 00:00:00 2001
-From: Swee Yee Fonn <swee.yee.fonn@intel.com>
-Date: Thu, 17 Sep 2020 12:57:02 +0800
-Subject: [PATCH] CIV: Fix sensor mediation hal reporting
+From 4b4f53f8624c8ad780777fe7ceedf44087c596eb Mon Sep 17 00:00:00 2001
+From: Basanagouda Koppad <basanagoudax.n.koppad@intel.com>
+Date: Sun, 23 Jan 2022 19:21:29 +0530
+Subject: [PATCH] CIV: Add android-removed-permissions.xml
 
-Add android-removed-permissions.xml to
-remove sensor features not supported
-on CML NUC.
-Add mixins option to support disable
-static sensor list reported by hal.
+Add unsupported features as unavailable
+added in file android-removed-permissions.xml
 
-Tracked-on: OAM-92946
-Change-Id: I7eacbf8b2ed646c3a70b2fe68a89fd7bc3be0bf4
+Tracked-On: OAM-92946
+Signed-off-by: Basanagouda Koppad <basanagoudax.n.koppad@intel.com>
 Signed-off-by: Swee Yee Fonn <swee.yee.fonn@intel.com>
----
- .../caas/android-removed-permissions.xml      | 24 +++++++++++++++++++
- groups/device-specific/caas/caas.mk           |  3 ++-
- groups/device-specific/caas/files.spec        |  1 +
- groups/sensors/mediation/BoardConfig.mk       |  4 ++++
- groups/sensors/mediation/option.spec          |  2 ++
- 5 files changed, 33 insertions(+), 1 deletion(-)
- create mode 100644 groups/device-specific/caas/android-removed-permissions.xml
- create mode 100644 groups/sensors/mediation/option.spec
 
 diff --git a/groups/device-specific/caas/android-removed-permissions.xml b/groups/device-specific/caas/android-removed-permissions.xml
 new file mode 100644
@@ -53,21 +41,21 @@ index 0000000..18d3ef8
 +    <unavailable-feature name="android.hardware.sensor.ambient_temperature" />
 +</permissions>
 diff --git a/groups/device-specific/caas/caas.mk b/groups/device-specific/caas/caas.mk
-index f35c675..90ddc40 100644
+index a3d92fb..d5f1c1b 100644
 --- a/groups/device-specific/caas/caas.mk
 +++ b/groups/device-specific/caas/caas.mk
 @@ -24,7 +24,8 @@ PRODUCT_FULL_TREBLE_OVERRIDE := false
  {{/treble}}
-
+ 
  PRODUCT_DEFAULT_PROPERTY_OVERRIDES += ro.zygote=zygote64_32
 -PRODUCT_COPY_FILES += system/core/rootdir/init.zygote64_32.rc:root/init.zygote64_32.rc
 +PRODUCT_COPY_FILES += system/core/rootdir/init.zygote64_32.rc:root/init.zygote64_32.rc \
 +    $(LOCAL_PATH)/android-removed-permissions.xml:system/etc/permissions/android-removed-permissions.xml
-
+ 
  BOARD_USE_64BIT_USERSPACE := true
-
+ 
 diff --git a/groups/device-specific/caas/files.spec b/groups/device-specific/caas/files.spec
-index 5de1f9b..0e6f38d 100644
+index c411bc1..463a243 100644
 --- a/groups/device-specific/caas/files.spec
 +++ b/groups/device-specific/caas/files.spec
 @@ -11,6 +11,7 @@ overlay: "configurations for SystemUI"
@@ -78,26 +66,6 @@ index 5de1f9b..0e6f38d 100644
  start_flash_usb.sh: "script for flashing qcow2 in Qemu"
  start_android_qcow2.sh: "script for starting android in Qemu"
  setup_host.sh: "script for setting up virtulization environment on host"
-diff --git a/groups/sensors/mediation/BoardConfig.mk b/groups/sensors/mediation/BoardConfig.mk
-index 7f6aba9..33f8cad 100644
---- a/groups/sensors/mediation/BoardConfig.mk
-+++ b/groups/sensors/mediation/BoardConfig.mk
-@@ -1,3 +1,7 @@
- USE_SENSOR_MEDIATION_HAL := true
-
-+{{#disable_static_sensor_list}}
-+MEDIATION_HAL_DISABLE_STATIC_SENSOR_LIST := true
-+{{/disable_static_sensor_list}}
-+
- BOARD_SEPOLICY_DIRS += $(INTEL_PATH_SEPOLICY)/sensors/mediation
-diff --git a/groups/sensors/mediation/option.spec b/groups/sensors/mediation/option.spec
-new file mode 100644
-index 0000000..64f0107
---- /dev/null
-+++ b/groups/sensors/mediation/option.spec
-@@ -0,0 +1,2 @@
-+[defaults]
-+disable_static_sensor_list = false
---
-2.17.1
+-- 
+2.34.1
 
