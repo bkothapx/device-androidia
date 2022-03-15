@@ -1,0 +1,1560 @@
+From 93afdba8ff320ca99d7b4a339074ab8c6f867ca1 Mon Sep 17 00:00:00 2001
+From: Dongwon Kim <dongwon.kim@intel.com>
+Date: Tue, 24 Aug 2021 12:25:14 -0700
+Subject: [PATCH] enabling RPLS
+
+(unofficial.. just for PO)
+Signed-off-by: Dongwon Kim <dongwon.kim@intel.com>
+---
+ cmake/setup_platform_flags.cmake              |  12 +-
+ .../core/source/gen12lp/rpls/CMakeLists.txt   |  18 ++
+ .../core/source/gen12lp/rpls/cmdlist_rpls.cpp |  25 +++
+ .../source/gen12lp/rpls/cmdqueue_rpls.cpp     |  18 ++
+ .../core/source/gen12lp/rpls/image_rpls.cpp   |  23 +++
+ .../core/source/gen12lp/rpls/kernel_rpls.cpp  |  14 ++
+ .../core/source/gen12lp/rpls/sampler_rpls.cpp |  19 ++
+ .../definitions/hw_info_setup_rpls.inl        |  15 ++
+ opencl/source/gen12lp/hw_info_rpls.cpp        | 154 ++++++++++++++++
+ .../unit_test/gen12lp/rpls/CMakeLists.txt     |  26 +++
+ .../unit_test/gen12lp/rpls/excludes_rpls.cpp  |  12 ++
+ .../gen12lp/rpls/linux/CMakeLists.txt         |  14 ++
+ .../gen12lp/rpls/linux/dll/CMakeLists.txt     |  11 ++
+ .../rpls/linux/dll/device_id_tests_rpls.cpp   |  55 ++++++
+ .../rpls/linux/hw_info_config_tests_rpls.cpp  | 170 ++++++++++++++++++
+ .../gen12lp/rpls/test_device_caps_rpls.cpp    |  40 +++++
+ .../gen12lp/rpls/ail_configuration_rpls.cpp   |  19 ++
+ .../aub_mem_dump/definitions/aub_services.h   |   1 +
+ .../source/dll/devices/devices_additional.inl |  10 ++
+ shared/source/gen12lp/CMakeLists.txt          |   8 +
+ .../gen12lp/definitions/hw_cmds_rpls.inl      |   6 +
+ .../definitions/hw_info_setup_rpls.inl        |  15 ++
+ shared/source/gen12lp/enable_gen12lp.cpp      |   3 +
+ .../gen12lp/enable_hw_info_config_rpls.cpp    |  15 ++
+ shared/source/gen12lp/hw_cmds.h               |   3 +
+ shared/source/gen12lp/hw_cmds_rpls.h          |  37 ++++
+ shared/source/gen12lp/hw_info.h               |   5 +-
+ shared/source/gen12lp/hw_info_rpls.cpp        | 154 ++++++++++++++++
+ shared/source/gen12lp/hw_info_rpls.h          |  23 +++
+ .../gen12lp/linux/hw_info_config_rpls.cpp     |  33 ++++
+ .../os_agnostic_hw_info_config_rpls.inl       |  38 ++++
+ .../gen12lp/windows/hw_info_config_rpls.cpp   |  24 +++
+ .../wddm/create_um_km_data_translator.cpp     |   3 +
+ .../test/common/gen12lp/rpls/CMakeLists.txt   |  18 ++
+ .../rpls/preamble_helper_tests_rpls.cpp       |  56 ++++++
+ .../gen12lp/rpls/test_hw_info_config_rpls.cpp |  69 +++++++
+ shared/test/common/test_macros/header/test.h  |  11 ++
+ target_unit_tests/gen12lp/rpls/CMakeLists.txt |  10 ++
+ .../gen12lp/rpls/enable_rpls_testing.cmake    |  10 ++
+ 39 files changed, 1195 insertions(+), 2 deletions(-)
+ create mode 100644 level_zero/core/source/gen12lp/rpls/CMakeLists.txt
+ create mode 100644 level_zero/core/source/gen12lp/rpls/cmdlist_rpls.cpp
+ create mode 100644 level_zero/core/source/gen12lp/rpls/cmdqueue_rpls.cpp
+ create mode 100644 level_zero/core/source/gen12lp/rpls/image_rpls.cpp
+ create mode 100644 level_zero/core/source/gen12lp/rpls/kernel_rpls.cpp
+ create mode 100644 level_zero/core/source/gen12lp/rpls/sampler_rpls.cpp
+ create mode 100644 opencl/source/gen12lp/definitions/hw_info_setup_rpls.inl
+ create mode 100644 opencl/source/gen12lp/hw_info_rpls.cpp
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/CMakeLists.txt
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/excludes_rpls.cpp
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/linux/CMakeLists.txt
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/linux/dll/CMakeLists.txt
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/linux/dll/device_id_tests_rpls.cpp
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/linux/hw_info_config_tests_rpls.cpp
+ create mode 100644 opencl/test/unit_test/gen12lp/rpls/test_device_caps_rpls.cpp
+ create mode 100644 shared/source/ail/gen12lp/rpls/ail_configuration_rpls.cpp
+ create mode 100644 shared/source/gen12lp/definitions/hw_cmds_rpls.inl
+ create mode 100644 shared/source/gen12lp/definitions/hw_info_setup_rpls.inl
+ create mode 100644 shared/source/gen12lp/enable_hw_info_config_rpls.cpp
+ create mode 100644 shared/source/gen12lp/hw_cmds_rpls.h
+ create mode 100644 shared/source/gen12lp/hw_info_rpls.cpp
+ create mode 100644 shared/source/gen12lp/hw_info_rpls.h
+ create mode 100644 shared/source/gen12lp/linux/hw_info_config_rpls.cpp
+ create mode 100644 shared/source/gen12lp/os_agnostic_hw_info_config_rpls.inl
+ create mode 100644 shared/source/gen12lp/windows/hw_info_config_rpls.cpp
+ create mode 100644 shared/test/common/gen12lp/rpls/CMakeLists.txt
+ create mode 100644 shared/test/common/gen12lp/rpls/preamble_helper_tests_rpls.cpp
+ create mode 100644 shared/test/common/gen12lp/rpls/test_hw_info_config_rpls.cpp
+ create mode 100644 target_unit_tests/gen12lp/rpls/CMakeLists.txt
+ create mode 100644 target_unit_tests/gen12lp/rpls/enable_rpls_testing.cmake
+
+diff --git a/cmake/setup_platform_flags.cmake b/cmake/setup_platform_flags.cmake
+index 224d3bb24..d26f7aaea 100644
+--- a/cmake/setup_platform_flags.cmake
++++ b/cmake/setup_platform_flags.cmake
+@@ -7,7 +7,7 @@
+ SET_FLAGS_FOR("GEN8" "BDW")
+ SET_FLAGS_FOR("GEN9" "SKL" "KBL" "BXT" "GLK" "CFL")
+ SET_FLAGS_FOR("GEN11" "ICLLP" "LKF" "EHL")
+-SET_FLAGS_FOR("GEN12LP" "TGLLP" "RKL" "ADLS" "ADLP")
++SET_FLAGS_FOR("GEN12LP" "TGLLP" "RKL" "ADLS" "ADLP" "RPLS")
+ 
+ foreach(GEN_TYPE ${XEHP_AND_LATER_GENS})
+   if(TESTS_${GEN_TYPE})
+@@ -198,6 +198,16 @@ if(SUPPORT_GEN12LP)
+       ADD_PRODUCT("TESTED" "ADLP" "IGFX_ALDERLAKE_P")
+     endif()
+   endif()
++
++  if(SUPPORT_RPLS)
++    ADD_PRODUCT("SUPPORTED" "RPLS" "IGFX_RAPTORLAKE_S")
++    ADD_PLATFORM_FOR_GEN("SUPPORTED" "GEN12LP" "RPLS" "LP")
++    ADD_PLATFORM_FOR_GEN("SUPPORTED_IMAGES" "GEN12LP" "RPLS" "LP")
++    if(TESTS_RPLS)
++      ADD_ITEM_FOR_GEN("PLATFORMS" "TESTED" "GEN12LP" "RPLS")
++      ADD_PRODUCT("TESTED" "RPLS" "IGFX_RAPTORLAKE_S")
++    endif()
++  endif()
+ endif()
+ 
+ if(SUPPORT_XE_HP_CORE)
+diff --git a/level_zero/core/source/gen12lp/rpls/CMakeLists.txt b/level_zero/core/source/gen12lp/rpls/CMakeLists.txt
+new file mode 100644
+index 000000000..01cedd696
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/CMakeLists.txt
+@@ -0,0 +1,18 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++if(SUPPORT_RPLS)
++  set(HW_SOURCES_GEN12LP
++      ${HW_SOURCES_GEN12LP}
++      ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++      ${CMAKE_CURRENT_SOURCE_DIR}/cmdlist_rpls.cpp
++      ${CMAKE_CURRENT_SOURCE_DIR}/cmdqueue_rpls.cpp
++      ${CMAKE_CURRENT_SOURCE_DIR}/kernel_rpls.cpp
++      ${CMAKE_CURRENT_SOURCE_DIR}/image_rpls.cpp
++      ${CMAKE_CURRENT_SOURCE_DIR}/sampler_rpls.cpp
++      PARENT_SCOPE
++  )
++endif()
+diff --git a/level_zero/core/source/gen12lp/rpls/cmdlist_rpls.cpp b/level_zero/core/source/gen12lp/rpls/cmdlist_rpls.cpp
+new file mode 100644
+index 000000000..9815c435f
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/cmdlist_rpls.cpp
+@@ -0,0 +1,25 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "level_zero/core/source/cmdlist/cmdlist_hw.inl"
++#include "level_zero/core/source/cmdlist/cmdlist_hw_base.inl"
++#include "level_zero/core/source/cmdlist/cmdlist_hw_immediate.inl"
++#include "level_zero/core/source/gen12lp/cmdlist_gen12lp.h"
++
++#include "cache_flush_gen12lp.inl"
++#include "cmdlist_extended.inl"
++
++namespace L0 {
++template struct CommandListCoreFamily<IGFX_GEN12LP_CORE>;
++
++static CommandListPopulateFactory<IGFX_RAPTORLAKE_S, CommandListProductFamily<IGFX_RAPTORLAKE_S>>
++    populateRPLS;
++
++static CommandListImmediatePopulateFactory<IGFX_RAPTORLAKE_S, CommandListImmediateProductFamily<IGFX_RAPTORLAKE_S>>
++    populateRPLSImmediate;
++
++} // namespace L0
+diff --git a/level_zero/core/source/gen12lp/rpls/cmdqueue_rpls.cpp b/level_zero/core/source/gen12lp/rpls/cmdqueue_rpls.cpp
+new file mode 100644
+index 000000000..cadcb1d0f
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/cmdqueue_rpls.cpp
+@@ -0,0 +1,18 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "level_zero/core/source/cmdqueue/cmdqueue_hw.inl"
++#include "level_zero/core/source/cmdqueue/cmdqueue_hw_base.inl"
++
++#include "cmdqueue_extended.inl"
++
++namespace L0 {
++template struct CommandQueueHw<IGFX_GEN12LP_CORE>;
++static CommandQueuePopulateFactory<IGFX_RAPTORLAKE_S, CommandQueueHw<IGFX_GEN12LP_CORE>>
++    populateRPLS;
++
++} // namespace L0
+diff --git a/level_zero/core/source/gen12lp/rpls/image_rpls.cpp b/level_zero/core/source/gen12lp/rpls/image_rpls.cpp
+new file mode 100644
+index 000000000..1b52b28d9
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/image_rpls.cpp
+@@ -0,0 +1,23 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "level_zero/core/source/image/image_hw.inl"
++
++namespace L0 {
++
++template <>
++struct ImageProductFamily<IGFX_RAPTORLAKE_S> : public ImageCoreFamily<IGFX_GEN12LP_CORE> {
++    using ImageCoreFamily::ImageCoreFamily;
++
++    ze_result_t initialize(Device *device, const ze_image_desc_t *desc) override {
++        return ImageCoreFamily<IGFX_GEN12LP_CORE>::initialize(device, desc);
++    };
++};
++
++static ImagePopulateFactory<IGFX_RAPTORLAKE_S, ImageProductFamily<IGFX_RAPTORLAKE_S>> populateRPLS;
++
++} // namespace L0
+diff --git a/level_zero/core/source/gen12lp/rpls/kernel_rpls.cpp b/level_zero/core/source/gen12lp/rpls/kernel_rpls.cpp
+new file mode 100644
+index 000000000..2a45f972c
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/kernel_rpls.cpp
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "level_zero/core/source/kernel/kernel_hw.h"
++
++namespace L0 {
++
++static KernelPopulateFactory<IGFX_RAPTORLAKE_S, KernelHw<IGFX_GEN12LP_CORE>> populateRPLS;
++
++} // namespace L0
+diff --git a/level_zero/core/source/gen12lp/rpls/sampler_rpls.cpp b/level_zero/core/source/gen12lp/rpls/sampler_rpls.cpp
+new file mode 100644
+index 000000000..ee20aa0c6
+--- /dev/null
++++ b/level_zero/core/source/gen12lp/rpls/sampler_rpls.cpp
+@@ -0,0 +1,19 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "level_zero/core/source/sampler/sampler_hw.inl"
++
++namespace L0 {
++
++template <>
++struct SamplerProductFamily<IGFX_RAPTORLAKE_S> : public SamplerCoreFamily<IGFX_GEN12LP_CORE> {
++    using SamplerCoreFamily::SamplerCoreFamily;
++};
++
++static SamplerPopulateFactory<IGFX_RAPTORLAKE_S, SamplerProductFamily<IGFX_RAPTORLAKE_S>> populateRPLS;
++
++} // namespace L0
+diff --git a/opencl/source/gen12lp/definitions/hw_info_setup_rpls.inl b/opencl/source/gen12lp/definitions/hw_info_setup_rpls.inl
+new file mode 100644
+index 000000000..0e81fbd0f
+--- /dev/null
++++ b/opencl/source/gen12lp/definitions/hw_info_setup_rpls.inl
+@@ -0,0 +1,15 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++const uint64_t RPLS::defaultHardwareInfoConfig = 0x0;
++const HardwareInfo RPLS::hwInfo = RPLS_CONFIG::hwInfo;
++
++void setupRPLSHardwareInfoImpl(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable, uint64_t hwInfoConfig) {
++    RPLS_CONFIG::setupHardwareInfo(hwInfo, setupFeatureTableAndWorkaroundTable);
++}
++
++void (*RPLS::setupHardwareInfo)(HardwareInfo *, bool, const uint64_t) = setupRPLSHardwareInfoImpl;
+diff --git a/opencl/source/gen12lp/hw_info_rpls.cpp b/opencl/source/gen12lp/hw_info_rpls.cpp
+new file mode 100644
+index 000000000..d9ffdd8fd
+--- /dev/null
++++ b/opencl/source/gen12lp/hw_info_rpls.cpp
+@@ -0,0 +1,154 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/aub_mem_dump/definitions/aub_services.h"
++#include "shared/source/gen12lp/hw_cmds.h"
++#include "shared/source/helpers/constants.h"
++
++#include "engine_node.h"
++
++namespace NEO {
++
++const char *HwMapper<IGFX_RAPTORLAKE_S>::abbreviation = "rpls";
++
++bool isSimulationRPLS(unsigned short deviceId) {
++    return false;
++};
++
++const PLATFORM RPLS::platform = {
++    IGFX_RAPTORLAKE_S,
++    PCH_UNKNOWN,
++    IGFX_GEN12LP_CORE,
++    IGFX_GEN12LP_CORE,
++    PLATFORM_NONE, // default init
++    0,             // usDeviceID
++    0,             // usRevId. 0 sets the stepping to A0
++    0,             // usDeviceID_PCH
++    0,             // usRevId_PCH
++    GTTYPE_UNDEFINED};
++
++const RuntimeCapabilityTable RPLS::capabilityTable{
++    EngineDirectSubmissionInitVec{
++        {aub_stream::ENGINE_RCS, {true, true}},
++        {aub_stream::ENGINE_CCS, {true, true}}},    // directSubmissionEngines
++    {0, 0, 0, false, false, false},                 // kmdNotifyProperties
++    MemoryConstants::max64BitAppAddress,            // gpuAddressSpace
++    83.333,                                         // defaultProfilingTimerResolution
++    MemoryConstants::pageSize,                      // requiredPreemptionSurfaceSize
++    &isSimulationRPLS,                              // isSimulation
++    PreemptionMode::MidThread,                      // defaultPreemptionMode
++    aub_stream::ENGINE_RCS,                         // defaultEngineType
++    0,                                              // maxRenderFrequency
++    30,                                             // clVersionSupport
++    CmdServicesMemTraceVersion::DeviceValues::Rpls, // aubDeviceId
++    1,                                              // extraQuantityThreadsPerEU
++    64,                                             // slmSize
++    sizeof(RPLS::GRF),                              // grfSize
++    36u,                                            // timestampValidBits
++    32u,                                            // kernelTimestampValidBits
++    false,                                          // blitterOperationsSupported
++    true,                                           // ftrSupportsInteger64BitAtomics
++    false,                                          // ftrSupportsFP64
++    false,                                          // ftrSupports64BitMath
++    true,                                           // ftrSvm
++    false,                                          // ftrSupportsCoherency
++    false,                                          // ftrSupportsVmeAvcTextureSampler
++    false,                                          // ftrSupportsVmeAvcPreemption
++    false,                                          // ftrRenderCompressedBuffers
++    false,                                          // ftrRenderCompressedImages
++    true,                                           // instrumentationEnabled
++    true,                                           // forceStatelessCompilationFor32Bit
++    true,                                           // ftr64KBpages
++    "lp",                                           // platformType
++    "",                                             // deviceName
++    true,                                           // sourceLevelDebuggerSupported
++    false,                                          // supportsVme
++    false,                                          // supportCacheFlushAfterWalker
++    true,                                           // supportsImages
++    false,                                          // supportsDeviceEnqueue
++    false,                                          // supportsPipes
++    true,                                           // supportsOcl21Features
++    false,                                          // supportsOnDemandPageFaults
++    false,                                          // supportsIndependentForwardProgress
++    false,                                          // hostPtrTrackingEnabled
++    true,                                           // levelZeroSupported
++    true,                                           // isIntegratedDevice
++    true,                                           // supportsMediaBlock
++    true                                            // fusedEuEnabled
++};
++
++WorkaroundTable RPLS::workaroundTable = {};
++FeatureTable RPLS::featureTable = {};
++
++void RPLS::setupFeatureAndWorkaroundTable(HardwareInfo *hwInfo) {
++    FeatureTable *featureTable = &hwInfo->featureTable;
++    WorkaroundTable *workaroundTable = &hwInfo->workaroundTable;
++
++    featureTable->ftrL3IACoherency = true;
++    featureTable->ftrPPGTT = true;
++    featureTable->ftrSVM = true;
++    featureTable->ftrIA32eGfxPTEs = true;
++    featureTable->ftrStandardMipTailFormat = true;
++
++    featureTable->ftrTranslationTable = true;
++    featureTable->ftrUserModeTranslationTable = true;
++    featureTable->ftrTileMappedResource = true;
++    featureTable->ftrEnableGuC = true;
++
++    featureTable->ftrFbc = true;
++    featureTable->ftrFbc2AddressTranslation = true;
++    featureTable->ftrFbcBlitterTracking = true;
++    featureTable->ftrFbcCpuTracking = true;
++    featureTable->ftrTileY = false;
++
++    featureTable->ftrAstcHdr2D = true;
++    featureTable->ftrAstcLdr2D = true;
++
++    featureTable->ftr3dMidBatchPreempt = true;
++    featureTable->ftrGpGpuMidBatchPreempt = true;
++    featureTable->ftrGpGpuThreadGroupLevelPreempt = true;
++    featureTable->ftrPerCtxtPreemptionGranularityControl = true;
++
++    workaroundTable->wa4kAlignUVOffsetNV12LinearSurface = true;
++    workaroundTable->waEnablePreemptionGranularityControlByUMD = true;
++    workaroundTable->waUntypedBufferCompression = true;
++};
++const HardwareInfo RPLS_CONFIG::hwInfo = {
++    &RPLS::platform,
++    &RPLS::featureTable,
++    &RPLS::workaroundTable,
++    &RPLS_CONFIG::gtSystemInfo,
++    RPLS::capabilityTable,
++};
++
++GT_SYSTEM_INFO RPLS_CONFIG::gtSystemInfo = {0};
++void RPLS_CONFIG::setupHardwareInfo(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable) {
++    GT_SYSTEM_INFO *gtSysInfo = &hwInfo->gtSystemInfo;
++    gtSysInfo->CsrSizeInMb = 8;
++    gtSysInfo->IsDynamicallyPopulated = false;
++
++    // non-zero values for unit tests
++    if (gtSysInfo->SliceCount == 0) {
++        gtSysInfo->SliceCount = 2;
++        gtSysInfo->SubSliceCount = 8;
++        gtSysInfo->EUCount = 40;
++        gtSysInfo->MaxEuPerSubSlice = RPLS::maxEuPerSubslice;
++        gtSysInfo->MaxSlicesSupported = RPLS::maxSlicesSupported;
++        gtSysInfo->MaxSubSlicesSupported = RPLS::maxSubslicesSupported;
++
++        gtSysInfo->L3BankCount = 1;
++
++        gtSysInfo->CCSInfo.IsValid = true;
++        gtSysInfo->CCSInfo.NumberOfCCSEnabled = 1;
++    }
++
++    if (setupFeatureTableAndWorkaroundTable) {
++        setupFeatureAndWorkaroundTable(hwInfo);
++    }
++};
++#include "hw_info_setup_rpls.inl"
++} // namespace NEO
+diff --git a/opencl/test/unit_test/gen12lp/rpls/CMakeLists.txt b/opencl/test/unit_test/gen12lp/rpls/CMakeLists.txt
+new file mode 100644
+index 000000000..1244bb059
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/CMakeLists.txt
+@@ -0,0 +1,26 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++if(TESTS_RPLS)
++  set(IGDRCL_SRCS_tests_gen12lp_rpls_excludes
++      ${CMAKE_CURRENT_SOURCE_DIR}/excludes_rpls.cpp
++  )
++  set_property(GLOBAL APPEND PROPERTY IGDRCL_SRCS_tests_excludes ${IGDRCL_SRCS_tests_gen12lp_rpls_excludes})
++
++  set(IGDRCL_SRCS_tests_gen12lp_rpls
++      ${IGDRCL_SRCS_tests_gen12lp_rpls_excludes}
++      ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++      ${CMAKE_CURRENT_SOURCE_DIR}/test_device_caps_rpls.cpp
++  )
++
++  get_property(NEO_CORE_TESTS_GEN12LP_RPLS GLOBAL PROPERTY NEO_CORE_TESTS_GEN12LP_RPLS)
++  list(APPEND IGDRCL_SRCS_tests_gen12lp_rpls ${NEO_CORE_TESTS_GEN12LP_RPLS})
++
++  target_sources(igdrcl_tests PRIVATE ${IGDRCL_SRCS_tests_gen12lp_rpls})
++  add_subdirectories()
++  neo_copy_test_files_with_revision(copy_test_files_rpls_0 rpls 0)
++  add_dependencies(copy_test_files_per_product copy_test_files_rpls_0)
++endif()
+diff --git a/opencl/test/unit_test/gen12lp/rpls/excludes_rpls.cpp b/opencl/test/unit_test/gen12lp/rpls/excludes_rpls.cpp
+new file mode 100644
+index 000000000..b3b157757
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/excludes_rpls.cpp
+@@ -0,0 +1,12 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "test.h"
++
++HWTEST_EXCLUDE_PRODUCT(BufferSetSurfaceTests, givenBufferSetSurfaceThatMemoryIsUnalignedToCachelineButReadOnlyThenL3CacheShouldBeStillOn, IGFX_RAPTORLAKE_S)
++HWTEST_EXCLUDE_PRODUCT(BufferSetSurfaceTests, givenAlignedCacheableReadOnlyBufferThenChoseOclBufferPolicy, IGFX_RAPTORLAKE_S);
++HWTEST_EXCLUDE_PRODUCT(DeviceFactoryTest, givenInvalidHwConfigStringWhenPrepareDeviceEnvironmentsForProductFamilyOverrideThenThrowsException, IGFX_RAPTORLAKE_S);
+diff --git a/opencl/test/unit_test/gen12lp/rpls/linux/CMakeLists.txt b/opencl/test/unit_test/gen12lp/rpls/linux/CMakeLists.txt
+new file mode 100644
+index 000000000..9ea0367a9
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/linux/CMakeLists.txt
+@@ -0,0 +1,14 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++set(IGDRCL_SRCS_tests_gen12_rpls_linux
++    ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++    ${CMAKE_CURRENT_SOURCE_DIR}/hw_info_config_tests_rpls.cpp
++)
++if(UNIX)
++  target_sources(igdrcl_tests PRIVATE ${IGDRCL_SRCS_tests_gen12_rpls_linux})
++  add_subdirectory(dll)
++endif()
+diff --git a/opencl/test/unit_test/gen12lp/rpls/linux/dll/CMakeLists.txt b/opencl/test/unit_test/gen12lp/rpls/linux/dll/CMakeLists.txt
+new file mode 100644
+index 000000000..ca9874b3a
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/linux/dll/CMakeLists.txt
+@@ -0,0 +1,11 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++set(IGDRCL_SRCS_linux_dll_tests_gen12_rpls
++    ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++    ${CMAKE_CURRENT_SOURCE_DIR}${BRANCH_DIR_SUFFIX}/device_id_tests_rpls.cpp
++)
++target_sources(igdrcl_linux_dll_tests PRIVATE ${IGDRCL_SRCS_linux_dll_tests_gen12_rpls})
+diff --git a/opencl/test/unit_test/gen12lp/rpls/linux/dll/device_id_tests_rpls.cpp b/opencl/test/unit_test/gen12lp/rpls/linux/dll/device_id_tests_rpls.cpp
+new file mode 100644
+index 000000000..1208b027a
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/linux/dll/device_id_tests_rpls.cpp
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/gen12lp/hw_cmds.h"
++#include "shared/source/os_interface/linux/drm_neo.h"
++
++#include "test.h"
++
++#include <array>
++
++using namespace NEO;
++
++TEST(RplsDeviceIdTest, GivenSupportedDeviceIdThenDeviceDescriptorTableExists) {
++    std::array<DeviceDescriptor, 18> expectedDescriptors = {{
++        {0x46A0, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46B0, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46A1, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46A2, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46A3, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46A6, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46A8, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46AA, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x462A, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x4626, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x4628, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46B1, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46B2, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46B3, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46C0, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46C1, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46C2, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++        {0x46C3, &RPLS_CONFIG::hwInfo, &RPLS_CONFIG::setupHardwareInfo, GTTYPE_GT2},
++    }};
++
++    auto compareStructs = [](const DeviceDescriptor *first, const DeviceDescriptor *second) {
++        return first->deviceId == second->deviceId && first->pHwInfo == second->pHwInfo &&
++               first->setupHardwareInfo == second->setupHardwareInfo && first->eGtType == second->eGtType;
++    };
++
++    size_t startIndex = 0;
++    while (!compareStructs(&expectedDescriptors[0], &deviceDescriptorTable[startIndex]) &&
++           deviceDescriptorTable[startIndex].deviceId != 0) {
++        startIndex++;
++    };
++    EXPECT_NE(0u, deviceDescriptorTable[startIndex].deviceId);
++
++    for (auto &expected : expectedDescriptors) {
++        EXPECT_TRUE(compareStructs(&expected, &deviceDescriptorTable[startIndex]));
++        startIndex++;
++    }
++}
+diff --git a/opencl/test/unit_test/gen12lp/rpls/linux/hw_info_config_tests_rpls.cpp b/opencl/test/unit_test/gen12lp/rpls/linux/hw_info_config_tests_rpls.cpp
+new file mode 100644
+index 000000000..786ff1fb0
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/linux/hw_info_config_tests_rpls.cpp
+@@ -0,0 +1,170 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/os_interface/os_interface.h"
++#include "shared/test/common/helpers/default_hw_info.h"
++
++#include "opencl/test/unit_test/helpers/gtest_helpers.h"
++#include "opencl/test/unit_test/os_interface/linux/drm_mock.h"
++#include "opencl/test/unit_test/os_interface/linux/hw_info_config_linux_tests.h"
++
++using namespace NEO;
++
++struct HwInfoConfigTestLinuxRpls : HwInfoConfigTestLinux {
++    void SetUp() override {
++        HwInfoConfigTestLinux::SetUp();
++
++        drm = new DrmMock(*executionEnvironment->rootDeviceEnvironments[0]);
++        osInterface->setDriverModel(std::unique_ptr<DriverModel>(drm));
++
++        drm->storedDeviceID = IGFX_RAPTORLAKE_S;
++        drm->setGtType(GTTYPE_GT2);
++    }
++};
++
++RPLSTEST_F(HwInfoConfigTestLinuxRpls, WhenConfiguringHwInfoThenInfoIsSetCorrectly) {
++    auto hwInfoConfig = HwInfoConfig::get(productFamily);
++    int ret = hwInfoConfig->configureHwInfoDrm(&pInHwInfo, &outHwInfo, osInterface);
++    EXPECT_EQ(0, ret);
++    EXPECT_EQ(static_cast<unsigned short>(drm->storedDeviceID), outHwInfo.platform.usDeviceID);
++    EXPECT_EQ(static_cast<unsigned short>(drm->storedDeviceRevID), outHwInfo.platform.usRevId);
++    EXPECT_EQ(static_cast<uint32_t>(drm->storedEUVal), outHwInfo.gtSystemInfo.EUCount);
++    EXPECT_EQ(static_cast<uint32_t>(drm->storedSSVal), outHwInfo.gtSystemInfo.SubSliceCount);
++    EXPECT_EQ(1u, outHwInfo.gtSystemInfo.SliceCount);
++
++    EXPECT_EQ(GTTYPE_GT2, outHwInfo.platform.eGTType);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGT1);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGT1_5);
++    EXPECT_TRUE(outHwInfo.featureTable.ftrGT2);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGT3);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGT4);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGTA);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGTC);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrGTX);
++    EXPECT_FALSE(outHwInfo.featureTable.ftrTileY);
++}
++
++RPLSTEST_F(HwInfoConfigTestLinuxRpls, GivenInvalidDeviceIdWhenConfiguringHwInfoThenErrorIsReturned) {
++    auto hwInfoConfig = HwInfoConfig::get(productFamily);
++
++    drm->storedRetValForDeviceID = -1;
++    int ret = hwInfoConfig->configureHwInfoDrm(&pInHwInfo, &outHwInfo, osInterface);
++    EXPECT_EQ(-1, ret);
++
++    drm->storedRetValForDeviceID = 0;
++    drm->storedRetValForDeviceRevID = -1;
++    ret = hwInfoConfig->configureHwInfoDrm(&pInHwInfo, &outHwInfo, osInterface);
++    EXPECT_EQ(-1, ret);
++
++    drm->storedRetValForDeviceRevID = 0;
++    drm->failRetTopology = true;
++    drm->storedRetValForEUVal = -1;
++    ret = hwInfoConfig->configureHwInfoDrm(&pInHwInfo, &outHwInfo, osInterface);
++    EXPECT_EQ(-1, ret);
++
++    drm->storedRetValForEUVal = 0;
++    drm->storedRetValForSSVal = -1;
++    ret = hwInfoConfig->configureHwInfoDrm(&pInHwInfo, &outHwInfo, osInterface);
++    EXPECT_EQ(-1, ret);
++}
++
++template <typename T>
++using RplsConfigHwInfoTests = ::testing::Test;
++using rplsConfigTestTypes = ::testing::Types<RPLS_CONFIG>;
++TYPED_TEST_CASE(RplsConfigHwInfoTests, rplsConfigTestTypes);
++TYPED_TEST(RplsConfigHwInfoTests, givenRplsConfigWhenSetupHardwareInfoThenGtSystemInfoAndWaAndFtrTablesAreSetCorrect) {
++    HardwareInfo hwInfo = *defaultHwInfo;
++    auto executionEnvironment = std::make_unique<ExecutionEnvironment>();
++    executionEnvironment->prepareRootDeviceEnvironments(1);
++    executionEnvironment->rootDeviceEnvironments[0]->setHwInfo(defaultHwInfo.get());
++    DrmMock drm(*executionEnvironment->rootDeviceEnvironments[0]);
++    GT_SYSTEM_INFO &gtSystemInfo = hwInfo.gtSystemInfo;
++    auto &featureTable = hwInfo.featureTable;
++    auto &workaroundTable = hwInfo.workaroundTable;
++    DeviceDescriptor device = {0, &hwInfo, &TypeParam::setupHardwareInfo, GTTYPE_GT1};
++
++    int ret = drm.setupHardwareInfo(&device, false);
++
++    EXPECT_EQ(ret, 0);
++    EXPECT_EQ(8u, gtSystemInfo.CsrSizeInMb);
++    EXPECT_FALSE(gtSystemInfo.IsL3HashModeEnabled);
++    EXPECT_FALSE(gtSystemInfo.IsDynamicallyPopulated);
++
++    EXPECT_FALSE(featureTable.ftrL3IACoherency);
++    EXPECT_FALSE(featureTable.ftrPPGTT);
++    EXPECT_FALSE(featureTable.ftrSVM);
++    EXPECT_FALSE(featureTable.ftrIA32eGfxPTEs);
++    EXPECT_FALSE(featureTable.ftrStandardMipTailFormat);
++    EXPECT_FALSE(featureTable.ftrTranslationTable);
++    EXPECT_FALSE(featureTable.ftrUserModeTranslationTable);
++    EXPECT_FALSE(featureTable.ftrTileMappedResource);
++    EXPECT_FALSE(featureTable.ftrEnableGuC);
++    EXPECT_FALSE(featureTable.ftrFbc);
++    EXPECT_FALSE(featureTable.ftrFbc2AddressTranslation);
++    EXPECT_FALSE(featureTable.ftrFbcBlitterTracking);
++    EXPECT_FALSE(featureTable.ftrFbcCpuTracking);
++    EXPECT_FALSE(featureTable.ftrTileY);
++    EXPECT_FALSE(featureTable.ftrAstcHdr2D);
++    EXPECT_FALSE(featureTable.ftrAstcLdr2D);
++    EXPECT_FALSE(featureTable.ftr3dMidBatchPreempt);
++    EXPECT_FALSE(featureTable.ftrGpGpuMidBatchPreempt);
++    EXPECT_FALSE(featureTable.ftrGpGpuThreadGroupLevelPreempt);
++    EXPECT_FALSE(featureTable.ftrPerCtxtPreemptionGranularityControl);
++
++    EXPECT_FALSE(workaroundTable.wa4kAlignUVOffsetNV12LinearSurface);
++    EXPECT_FALSE(workaroundTable.waEnablePreemptionGranularityControlByUMD);
++    EXPECT_FALSE(workaroundTable.waUntypedBufferCompression);
++
++    ret = drm.setupHardwareInfo(&device, true);
++
++    EXPECT_EQ(ret, 0);
++    EXPECT_EQ(8u, gtSystemInfo.CsrSizeInMb);
++    EXPECT_FALSE(gtSystemInfo.IsL3HashModeEnabled);
++    EXPECT_FALSE(gtSystemInfo.IsDynamicallyPopulated);
++
++    EXPECT_TRUE(featureTable.ftrL3IACoherency);
++    EXPECT_TRUE(featureTable.ftrPPGTT);
++    EXPECT_TRUE(featureTable.ftrSVM);
++    EXPECT_TRUE(featureTable.ftrIA32eGfxPTEs);
++    EXPECT_TRUE(featureTable.ftrStandardMipTailFormat);
++    EXPECT_TRUE(featureTable.ftrTranslationTable);
++    EXPECT_TRUE(featureTable.ftrUserModeTranslationTable);
++    EXPECT_TRUE(featureTable.ftrTileMappedResource);
++    EXPECT_TRUE(featureTable.ftrEnableGuC);
++    EXPECT_TRUE(featureTable.ftrFbc);
++    EXPECT_TRUE(featureTable.ftrFbc2AddressTranslation);
++    EXPECT_TRUE(featureTable.ftrFbcBlitterTracking);
++    EXPECT_TRUE(featureTable.ftrFbcCpuTracking);
++    EXPECT_FALSE(featureTable.ftrTileY);
++    EXPECT_TRUE(featureTable.ftrAstcHdr2D);
++    EXPECT_TRUE(featureTable.ftrAstcLdr2D);
++    EXPECT_TRUE(featureTable.ftr3dMidBatchPreempt);
++    EXPECT_TRUE(featureTable.ftrGpGpuMidBatchPreempt);
++    EXPECT_TRUE(featureTable.ftrGpGpuThreadGroupLevelPreempt);
++    EXPECT_TRUE(featureTable.ftrPerCtxtPreemptionGranularityControl);
++
++    EXPECT_TRUE(workaroundTable.wa4kAlignUVOffsetNV12LinearSurface);
++    EXPECT_TRUE(workaroundTable.waEnablePreemptionGranularityControlByUMD);
++    EXPECT_TRUE(workaroundTable.waUntypedBufferCompression);
++}
++
++TYPED_TEST(RplsConfigHwInfoTests, givenSliceCountZeroWhenSetupHardwareInfoThenNotZeroValuesSetInGtSystemInfo) {
++    HardwareInfo hwInfo = {};
++    hwInfo.gtSystemInfo = {0};
++
++    TypeParam::setupHardwareInfo(&hwInfo, false);
++
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.SliceCount);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.SubSliceCount);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.EUCount);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.MaxEuPerSubSlice);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.MaxSlicesSupported);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.MaxSubSlicesSupported);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.L3BankCount);
++    EXPECT_TRUE(hwInfo.gtSystemInfo.CCSInfo.IsValid);
++    EXPECT_NE(0u, hwInfo.gtSystemInfo.CCSInfo.NumberOfCCSEnabled);
++}
+diff --git a/opencl/test/unit_test/gen12lp/rpls/test_device_caps_rpls.cpp b/opencl/test/unit_test/gen12lp/rpls/test_device_caps_rpls.cpp
+new file mode 100644
+index 000000000..1fd88fa36
+--- /dev/null
++++ b/opencl/test/unit_test/gen12lp/rpls/test_device_caps_rpls.cpp
+@@ -0,0 +1,40 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "opencl/test/unit_test/fixtures/cl_device_fixture.h"
++#include "test.h"
++
++using namespace NEO;
++
++using RplsUsDeviceIdTest = Test<ClDeviceFixture>;
++
++RPLSTEST_F(RplsUsDeviceIdTest, GivenNonZeroIdThenIsSimulationIsTrue) {
++    unsigned short simulationIds[] = {
++        0, // default, non-simulation
++    };
++
++    for (auto id : simulationIds) {
++        auto mockDevice = std::unique_ptr<MockDevice>(createWithUsDeviceId(id));
++        ASSERT_NE(mockDevice.get(), nullptr);
++
++        if (id == 0) {
++            EXPECT_FALSE(mockDevice->isSimulation());
++        } else {
++            EXPECT_TRUE(mockDevice->isSimulation());
++        }
++    }
++}
++
++RPLSTEST_F(RplsUsDeviceIdTest, givenRPLSWhenCheckFtrSupportsInteger64BitAtomicsThenReturnFalse) {
++    EXPECT_TRUE(pDevice->getHardwareInfo().capabilityTable.ftrSupportsInteger64BitAtomics);
++}
++
++RPLSTEST_F(RplsUsDeviceIdTest, givenRplsWhenRequestedVmeFlagsThenReturnFalse) {
++    EXPECT_FALSE(pDevice->getHardwareInfo().capabilityTable.supportsVme);
++    EXPECT_FALSE(pDevice->getHardwareInfo().capabilityTable.ftrSupportsVmeAvcTextureSampler);
++    EXPECT_FALSE(pDevice->getHardwareInfo().capabilityTable.ftrSupportsVmeAvcPreemption);
++}
+diff --git a/shared/source/ail/gen12lp/rpls/ail_configuration_rpls.cpp b/shared/source/ail/gen12lp/rpls/ail_configuration_rpls.cpp
+new file mode 100644
+index 000000000..b61540c75
+--- /dev/null
++++ b/shared/source/ail/gen12lp/rpls/ail_configuration_rpls.cpp
+@@ -0,0 +1,19 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/ail/ail_configuration.h"
++
++#include <map>
++namespace NEO {
++static EnableAIL<IGFX_RAPTORLAKE_S> enableAILRPLS;
++
++std::map<std::string_view, std::vector<AILEnumeration>> applicationMapRPLS = {};
++
++template <>
++inline void AILConfigurationHw<IGFX_RAPTORLAKE_S>::applyExt(RuntimeCapabilityTable &runtimeCapabilityTable) {
++}
++} // namespace NEO
+diff --git a/shared/source/aub_mem_dump/definitions/aub_services.h b/shared/source/aub_mem_dump/definitions/aub_services.h
+index a9a7ec2c4..316540aa5 100644
+--- a/shared/source/aub_mem_dump/definitions/aub_services.h
++++ b/shared/source/aub_mem_dump/definitions/aub_services.h
+@@ -105,6 +105,7 @@ struct CmdServicesMemTraceVersion {
+             Adls = 37,
+             XeHP_SDV = 29,
+             Adlp = 38,
++            Rpls = 39,
+         };
+     };
+     struct RecordingMethodValues {
+diff --git a/shared/source/dll/devices/devices_additional.inl b/shared/source/dll/devices/devices_additional.inl
+index 887976361..03349297b 100644
+--- a/shared/source/dll/devices/devices_additional.inl
++++ b/shared/source/dll/devices/devices_additional.inl
+@@ -26,4 +26,14 @@ DEVICE(0x46C1, ADLP_CONFIG, GTTYPE_GT2)
+ DEVICE(0x46C2, ADLP_CONFIG, GTTYPE_GT2)
+ DEVICE(0x46C3, ADLP_CONFIG, GTTYPE_GT2)
+ #endif
++#ifdef SUPPORT_RPLS
++DEVICE(0xA780, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA781, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA782, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA783, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA788, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA789, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA78A, RPLS_CONFIG, GTTYPE_GT2)
++DEVICE(0xA78B, RPLS_CONFIG, GTTYPE_GT2)
++#endif
+ #endif
+diff --git a/shared/source/gen12lp/CMakeLists.txt b/shared/source/gen12lp/CMakeLists.txt
+index 9d7d47d16..c5cc62649 100644
+--- a/shared/source/gen12lp/CMakeLists.txt
++++ b/shared/source/gen12lp/CMakeLists.txt
+@@ -14,6 +14,14 @@ if(SUPPORT_ADLP)
+   set_property(GLOBAL APPEND PROPERTY CORE_SRCS_GENX_ALL_BASE ${HW_DEFINITIONS_ADLP})
+ endif()
+ 
++if(SUPPORT_RPLS)
++  set(HW_DEFINITIONS_RPLS
++      ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++      ${CMAKE_CURRENT_SOURCE_DIR}/definitions${BRANCH_DIR_SUFFIX}/hw_cmds_rpls.inl
++  )
++  set_property(GLOBAL APPEND PROPERTY CORE_SRCS_GENX_ALL_BASE ${HW_DEFINITIONS_RPLS})
++endif()
++
+ if(SUPPORT_GEN12LP)
+   add_subdirectories()
+ endif()
+diff --git a/shared/source/gen12lp/definitions/hw_cmds_rpls.inl b/shared/source/gen12lp/definitions/hw_cmds_rpls.inl
+new file mode 100644
+index 000000000..af3c51cc0
+--- /dev/null
++++ b/shared/source/gen12lp/definitions/hw_cmds_rpls.inl
+@@ -0,0 +1,6 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
+diff --git a/shared/source/gen12lp/definitions/hw_info_setup_rpls.inl b/shared/source/gen12lp/definitions/hw_info_setup_rpls.inl
+new file mode 100644
+index 000000000..0e81fbd0f
+--- /dev/null
++++ b/shared/source/gen12lp/definitions/hw_info_setup_rpls.inl
+@@ -0,0 +1,15 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++const uint64_t RPLS::defaultHardwareInfoConfig = 0x0;
++const HardwareInfo RPLS::hwInfo = RPLS_CONFIG::hwInfo;
++
++void setupRPLSHardwareInfoImpl(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable, uint64_t hwInfoConfig) {
++    RPLS_CONFIG::setupHardwareInfo(hwInfo, setupFeatureTableAndWorkaroundTable);
++}
++
++void (*RPLS::setupHardwareInfo)(HardwareInfo *, bool, const uint64_t) = setupRPLSHardwareInfoImpl;
+diff --git a/shared/source/gen12lp/enable_gen12lp.cpp b/shared/source/gen12lp/enable_gen12lp.cpp
+index 00a361309..0bd15f903 100644
+--- a/shared/source/gen12lp/enable_gen12lp.cpp
++++ b/shared/source/gen12lp/enable_gen12lp.cpp
+@@ -27,4 +27,7 @@ static EnableGfxProductHw<IGFX_ALDERLAKE_S> enableGfxProductHwADLS;
+ #ifdef SUPPORT_ADLP
+ static EnableGfxProductHw<IGFX_ALDERLAKE_P> enableGfxProductHwADLP;
+ #endif
++#ifdef SUPPORT_RPLS
++static EnableGfxProductHw<IGFX_RAPTORLAKE_S> enableGfxProductHwRPLS;
++#endif
+ } // namespace NEO
+diff --git a/shared/source/gen12lp/enable_hw_info_config_rpls.cpp b/shared/source/gen12lp/enable_hw_info_config_rpls.cpp
+new file mode 100644
+index 000000000..3c6506b98
+--- /dev/null
++++ b/shared/source/gen12lp/enable_hw_info_config_rpls.cpp
+@@ -0,0 +1,15 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/gen12lp/hw_cmds.h"
++#include "shared/source/os_interface/hw_info_config.h"
++
++namespace NEO {
++
++static EnableProductHwInfoConfig<IGFX_RAPTORLAKE_S> enableRPLS;
++
++} // namespace NEO
+diff --git a/shared/source/gen12lp/hw_cmds.h b/shared/source/gen12lp/hw_cmds.h
+index 900acb4d5..8e4b562e4 100644
+--- a/shared/source/gen12lp/hw_cmds.h
++++ b/shared/source/gen12lp/hw_cmds.h
+@@ -22,3 +22,6 @@
+ #ifdef SUPPORT_ADLP
+ #include "hw_cmds_adlp.h"
+ #endif
++#ifdef SUPPORT_RPLS
++#include "hw_cmds_rpls.h"
++#endif
+diff --git a/shared/source/gen12lp/hw_cmds_rpls.h b/shared/source/gen12lp/hw_cmds_rpls.h
+new file mode 100644
+index 000000000..2285fbb43
+--- /dev/null
++++ b/shared/source/gen12lp/hw_cmds_rpls.h
+@@ -0,0 +1,37 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#pragma once
++#include "shared/source/gen12lp/hw_cmds_base.h"
++namespace NEO {
++
++struct RPLS : public TGLLPFamily {
++    static const PLATFORM platform;
++    static const HardwareInfo hwInfo;
++    static const uint64_t defaultHardwareInfoConfig;
++    static FeatureTable featureTable;
++    static WorkaroundTable workaroundTable;
++    static const uint32_t threadsPerEu = 7;
++    static const uint32_t maxEuPerSubslice = 16;
++    static const uint32_t maxSlicesSupported = 1;
++    static const uint32_t maxSubslicesSupported = 6;
++    static const uint32_t maxDualSubslicesSupported = 12;
++    static const RuntimeCapabilityTable capabilityTable;
++    static void (*setupHardwareInfo)(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable, uint64_t hwInfoConfig);
++    static void setupFeatureAndWorkaroundTable(HardwareInfo *hwInfo);
++};
++
++class RPLS_CONFIG : public RPLS {
++  public:
++    static void setupHardwareInfo(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable);
++    static const HardwareInfo hwInfo;
++
++  private:
++    static GT_SYSTEM_INFO gtSystemInfo;
++};
++#include "hw_cmds_rpls.inl"
++} // namespace NEO
+diff --git a/shared/source/gen12lp/hw_info.h b/shared/source/gen12lp/hw_info.h
+index fa16724bf..80780f336 100644
+--- a/shared/source/gen12lp/hw_info.h
++++ b/shared/source/gen12lp/hw_info.h
+@@ -20,4 +20,7 @@
+ #endif
+ #ifdef SUPPORT_ADLP
+ #include "hw_info_adlp.h"
+-#endif
+\ No newline at end of file
++#endif
++#ifdef SUPPORT_RPLS
++#include "hw_info_rpls.h"
++#endif
+diff --git a/shared/source/gen12lp/hw_info_rpls.cpp b/shared/source/gen12lp/hw_info_rpls.cpp
+new file mode 100644
+index 000000000..f9b50282b
+--- /dev/null
++++ b/shared/source/gen12lp/hw_info_rpls.cpp
+@@ -0,0 +1,154 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/aub_mem_dump/definitions/aub_services.h"
++#include "shared/source/gen12lp/hw_cmds.h"
++#include "shared/source/helpers/constants.h"
++
++#include "engine_node.h"
++
++namespace NEO {
++
++const char *HwMapper<IGFX_RAPTORLAKE_S>::abbreviation = "rpls";
++
++bool isSimulationRPLS(unsigned short deviceId) {
++    return false;
++};
++
++const PLATFORM RPLS::platform = {
++    IGFX_RAPTORLAKE_S,
++    PCH_UNKNOWN,
++    IGFX_GEN12LP_CORE,
++    IGFX_GEN12LP_CORE,
++    PLATFORM_NONE, // default init
++    0,             // usDeviceID
++    0,             // usRevId. 0 sets the stepping to A0
++    0,             // usDeviceID_PCH
++    0,             // usRevId_PCH
++    GTTYPE_UNDEFINED};
++
++const RuntimeCapabilityTable RPLS::capabilityTable{
++    EngineDirectSubmissionInitVec{
++        {aub_stream::ENGINE_RCS, {true, true}},
++        {aub_stream::ENGINE_CCS, {true, true}}},    // directSubmissionEngines
++    {0, 0, 0, false, false, false},                 // kmdNotifyProperties
++    MemoryConstants::max64BitAppAddress,            // gpuAddressSpace
++    83.333,                                         // defaultProfilingTimerResolution
++    MemoryConstants::pageSize,                      // requiredPreemptionSurfaceSize
++    &isSimulationRPLS,                              // isSimulation
++    PreemptionMode::MidThread,                      // defaultPreemptionMode
++    aub_stream::ENGINE_RCS,                         // defaultEngineType
++    0,                                              // maxRenderFrequency
++    30,                                             // clVersionSupport
++    CmdServicesMemTraceVersion::DeviceValues::Rpls, // aubDeviceId
++    1,                                              // extraQuantityThreadsPerEU
++    64,                                             // slmSize
++    sizeof(RPLS::GRF),                              // grfSize
++    36u,                                            // timestampValidBits
++    32u,                                            // kernelTimestampValidBits
++    false,                                          // blitterOperationsSupported
++    true,                                           // ftrSupportsInteger64BitAtomics
++    false,                                          // ftrSupportsFP64
++    false,                                          // ftrSupports64BitMath
++    true,                                           // ftrSvm
++    false,                                          // ftrSupportsCoherency
++    false,                                          // ftrSupportsVmeAvcTextureSampler
++    false,                                          // ftrSupportsVmeAvcPreemption
++    false,                                          // ftrRenderCompressedBuffers
++    false,                                          // ftrRenderCompressedImages
++    true,                                           // instrumentationEnabled
++    true,                                           // forceStatelessCompilationFor32Bit
++    true,                                           // ftr64KBpages
++    "lp",                                           // platformType
++    "",                                             // deviceName
++    true,                                           // sourceLevelDebuggerSupported
++    false,                                          // supportsVme
++    false,                                          // supportCacheFlushAfterWalker
++    true,                                           // supportsImages
++    false,                                          // supportsDeviceEnqueue
++    false,                                          // supportsPipes
++    true,                                           // supportsOcl21Features
++    false,                                          // supportsOnDemandPageFaults
++    false,                                          // supportsIndependentForwardProgress
++    false,                                          // hostPtrTrackingEnabled
++    true,                                           // levelZeroSupported
++    true,                                           // isIntegratedDevice
++    true,                                           // supportsMediaBlock
++    true                                            // fusedEuEnabled
++};
++
++WorkaroundTable RPLS::workaroundTable = {};
++FeatureTable RPLS::featureTable = {};
++
++void RPLS::setupFeatureAndWorkaroundTable(HardwareInfo *hwInfo) {
++    FeatureTable *featureTable = &hwInfo->featureTable;
++    WorkaroundTable *workaroundTable = &hwInfo->workaroundTable;
++
++    featureTable->ftrL3IACoherency = true;
++    featureTable->ftrPPGTT = true;
++    featureTable->ftrSVM = true;
++    featureTable->ftrIA32eGfxPTEs = true;
++    featureTable->ftrStandardMipTailFormat = true;
++
++    featureTable->ftrTranslationTable = true;
++    featureTable->ftrUserModeTranslationTable = true;
++    featureTable->ftrTileMappedResource = true;
++    featureTable->ftrEnableGuC = true;
++
++    featureTable->ftrFbc = true;
++    featureTable->ftrFbc2AddressTranslation = true;
++    featureTable->ftrFbcBlitterTracking = true;
++    featureTable->ftrFbcCpuTracking = true;
++    featureTable->ftrTileY = false;
++
++    featureTable->ftrAstcHdr2D = true;
++    featureTable->ftrAstcLdr2D = true;
++
++    featureTable->ftr3dMidBatchPreempt = true;
++    featureTable->ftrGpGpuMidBatchPreempt = true;
++    featureTable->ftrGpGpuThreadGroupLevelPreempt = true;
++    featureTable->ftrPerCtxtPreemptionGranularityControl = true;
++
++    workaroundTable->wa4kAlignUVOffsetNV12LinearSurface = true;
++    workaroundTable->waEnablePreemptionGranularityControlByUMD = true;
++    workaroundTable->waUntypedBufferCompression = true;
++};
++const HardwareInfo RPLS_CONFIG::hwInfo = {
++    &RPLS::platform,
++    &RPLS::featureTable,
++    &RPLS::workaroundTable,
++    &RPLS_CONFIG::gtSystemInfo,
++    RPLS::capabilityTable,
++};
++
++GT_SYSTEM_INFO RPLS_CONFIG::gtSystemInfo = {0};
++void RPLS_CONFIG::setupHardwareInfo(HardwareInfo *hwInfo, bool setupFeatureTableAndWorkaroundTable) {
++    GT_SYSTEM_INFO *gtSysInfo = &hwInfo->gtSystemInfo;
++    gtSysInfo->CsrSizeInMb = 8;
++    gtSysInfo->IsDynamicallyPopulated = false;
++
++    // non-zero values for unit tests
++    if (gtSysInfo->SliceCount == 0) {
++        gtSysInfo->SliceCount = 2;
++        gtSysInfo->SubSliceCount = 8;
++        gtSysInfo->EUCount = 40;
++        gtSysInfo->MaxEuPerSubSlice = ADLP::maxEuPerSubslice;
++        gtSysInfo->MaxSlicesSupported = ADLP::maxSlicesSupported;
++        gtSysInfo->MaxSubSlicesSupported = ADLP::maxSubslicesSupported;
++
++        gtSysInfo->L3BankCount = 1;
++
++        gtSysInfo->CCSInfo.IsValid = true;
++        gtSysInfo->CCSInfo.NumberOfCCSEnabled = 1;
++    }
++
++    if (setupFeatureTableAndWorkaroundTable) {
++        setupFeatureAndWorkaroundTable(hwInfo);
++    }
++};
++#include "hw_info_setup_rpls.inl"
++} // namespace NEO
+diff --git a/shared/source/gen12lp/hw_info_rpls.h b/shared/source/gen12lp/hw_info_rpls.h
+new file mode 100644
+index 000000000..e0611b7f1
+--- /dev/null
++++ b/shared/source/gen12lp/hw_info_rpls.h
+@@ -0,0 +1,23 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#pragma once
++#include "shared/source/gen12lp/hw_info_gen12lp.h"
++
++namespace NEO {
++
++struct RPLS;
++
++template <>
++struct HwMapper<IGFX_RAPTORLAKE_S> {
++    enum { gfxFamily = IGFX_GEN12LP_CORE };
++
++    static const char *abbreviation;
++    using GfxFamily = GfxFamilyMapper<static_cast<GFXCORE_FAMILY>(gfxFamily)>::GfxFamily;
++    using GfxProduct = RPLS;
++};
++} // namespace NEO
+diff --git a/shared/source/gen12lp/linux/hw_info_config_rpls.cpp b/shared/source/gen12lp/linux/hw_info_config_rpls.cpp
+new file mode 100644
+index 000000000..83da237c8
+--- /dev/null
++++ b/shared/source/gen12lp/linux/hw_info_config_rpls.cpp
+@@ -0,0 +1,33 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/helpers/hw_info.h"
++#include "shared/source/helpers/pipeline_select_helper.h"
++#include "shared/source/os_interface/hw_info_config.h"
++#include "shared/source/os_interface/hw_info_config.inl"
++#include "shared/source/os_interface/hw_info_config_bdw_and_later.inl"
++
++namespace NEO {
++constexpr static auto gfxProduct = IGFX_RAPTORLAKE_S;
++
++#include "shared/source/gen12lp/os_agnostic_hw_info_config_rpls.inl"
++#include "shared/source/gen12lp/os_agnostic_hw_info_config_gen12lp.inl"
++
++template <>
++int HwInfoConfigHw<gfxProduct>::configureHardwareCustom(HardwareInfo *hwInfo, OSInterface *osIface) {
++    GT_SYSTEM_INFO *gtSystemInfo = &hwInfo->gtSystemInfo;
++    gtSystemInfo->SliceCount = 1;
++    const auto &hwInfoConfig = *HwInfoConfig::get(hwInfo->platform.eProductFamily);
++    hwInfo->featureTable.ftrGpGpuMidThreadLevelPreempt = (hwInfo->platform.usRevId >= hwInfoConfig.getHwRevIdFromStepping(REVISION_A0, *hwInfo));
++
++    enableBlitterOperationsSupport(hwInfo);
++
++    return 0;
++}
++
++template class HwInfoConfigHw<gfxProduct>;
++} // namespace NEO
+diff --git a/shared/source/gen12lp/os_agnostic_hw_info_config_rpls.inl b/shared/source/gen12lp/os_agnostic_hw_info_config_rpls.inl
+new file mode 100644
+index 000000000..9526da7e8
+--- /dev/null
++++ b/shared/source/gen12lp/os_agnostic_hw_info_config_rpls.inl
+@@ -0,0 +1,38 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++template <>
++uint32_t HwInfoConfigHw<gfxProduct>::getHwRevIdFromStepping(uint32_t stepping, const HardwareInfo &hwInfo) const {
++    switch (stepping) {
++    case REVISION_A0:
++        return 0x0;
++    }
++    return CommonConstants::invalidStepping;
++}
++
++template <>
++uint32_t HwInfoConfigHw<gfxProduct>::getSteppingFromHwRevId(const HardwareInfo &hwInfo) const {
++    switch (hwInfo.platform.usRevId) {
++    case 0x0:
++        return REVISION_A0;
++    }
++    return CommonConstants::invalidStepping;
++}
++
++template <>
++void HwInfoConfigHw<gfxProduct>::setAdditionalPipelineSelectFields(void *pipelineSelectCmd,
++                                                                   const PipelineSelectArgs &pipelineSelectArgs,
++                                                                   const HardwareInfo &hwInfo) {
++    using PIPELINE_SELECT = typename TGLLPFamily::PIPELINE_SELECT;
++    auto pipelineSelectTglplpCmd = reinterpret_cast<PIPELINE_SELECT *>(pipelineSelectCmd);
++
++    auto mask = pipelineSelectTglplpCmd->getMaskBits();
++
++    mask |= pipelineSelectSystolicModeEnableMaskBits;
++    pipelineSelectTglplpCmd->setMaskBits(mask);
++    pipelineSelectTglplpCmd->setSpecialModeEnable(pipelineSelectArgs.specialPipelineSelectMode);
++}
+diff --git a/shared/source/gen12lp/windows/hw_info_config_rpls.cpp b/shared/source/gen12lp/windows/hw_info_config_rpls.cpp
+new file mode 100644
+index 000000000..5fd1958f6
+--- /dev/null
++++ b/shared/source/gen12lp/windows/hw_info_config_rpls.cpp
+@@ -0,0 +1,24 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/helpers/hw_info.h"
++#include "shared/source/os_interface/hw_info_config.h"
++#include "shared/source/os_interface/hw_info_config.inl"
++#include "shared/source/os_interface/hw_info_config_bdw_and_later.inl"
++
++namespace NEO {
++
++template <>
++void HwInfoConfigHw<IGFX_RAPTORLAKE_S>::adjustPlatformForProductFamily(HardwareInfo *hwInfo) {
++    PLATFORM *platform = &hwInfo->platform;
++    platform->eRenderCoreFamily = IGFX_GEN12LP_CORE;
++    platform->eDisplayCoreFamily = IGFX_GEN12LP_CORE;
++}
++
++template class HwInfoConfigHw<IGFX_RAPTORLAKE_S>;
++
++} // namespace NEO
+diff --git a/shared/source/os_interface/windows/wddm/create_um_km_data_translator.cpp b/shared/source/os_interface/windows/wddm/create_um_km_data_translator.cpp
+index 89b7bcfbb..5d5141786 100644
+--- a/shared/source/os_interface/windows/wddm/create_um_km_data_translator.cpp
++++ b/shared/source/os_interface/windows/wddm/create_um_km_data_translator.cpp
+@@ -148,6 +148,9 @@ class WslComputeHelperUmKmDataTranslator : public UmKmDataTranslator {
+             case 37:
+                 prod = IGFX_ALDERLAKE_P;
+                 break;
++            case 38:
++                prod = IGFX_RAPTORLAKE_S;
++                break;
+             }
+             dst.GfxPlatform.eProductFamily = static_cast<PRODUCT_FAMILY>(prod);
+         }
+diff --git a/shared/test/common/gen12lp/rpls/CMakeLists.txt b/shared/test/common/gen12lp/rpls/CMakeLists.txt
+new file mode 100644
+index 000000000..9eb238b3a
+--- /dev/null
++++ b/shared/test/common/gen12lp/rpls/CMakeLists.txt
+@@ -0,0 +1,18 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++if(TESTS_RPLS)
++  set(NEO_CORE_TESTS_GEN12LP_RPLS
++      ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
++      ${CMAKE_CURRENT_SOURCE_DIR}/preamble_helper_tests_rpls.cpp
++      ${CMAKE_CURRENT_SOURCE_DIR}/test_hw_info_config_rpls.cpp
++  )
++  set_property(GLOBAL PROPERTY NEO_CORE_TESTS_GEN12LP_RPLS ${NEO_CORE_TESTS_GEN12LP_RPLS})
++  add_subdirectories()
++  target_sources(${TARGET_NAME} PRIVATE
++                 ${NEO_CORE_TESTS_GEN12LP_RPLS}
++  )
++endif()
+diff --git a/shared/test/common/gen12lp/rpls/preamble_helper_tests_rpls.cpp b/shared/test/common/gen12lp/rpls/preamble_helper_tests_rpls.cpp
+new file mode 100644
+index 000000000..b866fcb01
+--- /dev/null
++++ b/shared/test/common/gen12lp/rpls/preamble_helper_tests_rpls.cpp
+@@ -0,0 +1,56 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/command_stream/csr_definitions.h"
++#include "shared/source/command_stream/linear_stream.h"
++#include "shared/source/helpers/pipeline_select_helper.h"
++#include "shared/source/helpers/preamble.h"
++#include "shared/test/common/helpers/dispatch_flags_helper.h"
++
++#include "test.h"
++
++using namespace NEO;
++
++using PreambleHelperTestsRpls = ::testing::Test;
++
++RPLSTEST_F(PreambleHelperTestsRpls, givenSpecialPipelineSelectModeDisabledWhenProgrammingPipelineSelectThenDisableSystolicMode) {
++    using PIPELINE_SELECT = typename FamilyType::PIPELINE_SELECT;
++    constexpr static auto bufferSize = sizeof(PIPELINE_SELECT);
++
++    char streamBuffer[bufferSize];
++    LinearStream stream{streamBuffer, sizeof(bufferSize)};
++
++    DispatchFlags flags = DispatchFlagsHelper::createDefaultDispatchFlags();
++    flags.pipelineSelectArgs.specialPipelineSelectMode = false;
++
++    auto *pCmd = static_cast<PIPELINE_SELECT *>(stream.getSpace(0));
++    PreambleHelper<FamilyType>::programPipelineSelect(&stream, flags.pipelineSelectArgs, RPLS::hwInfo);
++
++    const auto expectedMask = pipelineSelectEnablePipelineSelectMaskBits | pipelineSelectMediaSamplerDopClockGateMaskBits | pipelineSelectSystolicModeEnableMaskBits;
++    EXPECT_FALSE(pCmd->getSpecialModeEnable());
++    EXPECT_EQ(expectedMask, pCmd->getMaskBits());
++    EXPECT_EQ(PIPELINE_SELECT::PIPELINE_SELECTION_GPGPU, pCmd->getPipelineSelection());
++}
++
++RPLSTEST_F(PreambleHelperTestsRpls, givenSpecialPipelineSelectModeEnabledWhenProgrammingPipelineSelectThenEnableSystolicMode) {
++    using PIPELINE_SELECT = typename FamilyType::PIPELINE_SELECT;
++    constexpr static auto bufferSize = sizeof(PIPELINE_SELECT);
++
++    char streamBuffer[bufferSize];
++    LinearStream stream{streamBuffer, sizeof(bufferSize)};
++
++    DispatchFlags flags = DispatchFlagsHelper::createDefaultDispatchFlags();
++    flags.pipelineSelectArgs.specialPipelineSelectMode = true;
++
++    auto *pCmd = static_cast<PIPELINE_SELECT *>(stream.getSpace(0));
++    PreambleHelper<FamilyType>::programPipelineSelect(&stream, flags.pipelineSelectArgs, RPLS::hwInfo);
++
++    const auto expectedMask = pipelineSelectEnablePipelineSelectMaskBits | pipelineSelectMediaSamplerDopClockGateMaskBits | pipelineSelectSystolicModeEnableMaskBits;
++    EXPECT_TRUE(pCmd->getSpecialModeEnable());
++    EXPECT_EQ(expectedMask, pCmd->getMaskBits());
++    EXPECT_EQ(PIPELINE_SELECT::PIPELINE_SELECTION_GPGPU, pCmd->getPipelineSelection());
++}
+diff --git a/shared/test/common/gen12lp/rpls/test_hw_info_config_rpls.cpp b/shared/test/common/gen12lp/rpls/test_hw_info_config_rpls.cpp
+new file mode 100644
+index 000000000..bef6d21fb
+--- /dev/null
++++ b/shared/test/common/gen12lp/rpls/test_hw_info_config_rpls.cpp
+@@ -0,0 +1,69 @@
++/*
++ * Copyright (C) 2021 Intel Corporation
++ *
++ * SPDX-License-Identifier: MIT
++ *
++ */
++
++#include "shared/source/helpers/hw_helper.h"
++#include "shared/test/common/helpers/default_hw_info.h"
++
++#include "opencl/source/helpers/hardware_commands_helper.h"
++#include "test.h"
++
++using namespace NEO;
++
++using RplsHwInfo = ::testing::Test;
++
++RPLSTEST_F(RplsHwInfo, givenBoolWhenCallRplsHardwareInfoSetupThenFeatureTableAndWorkaroundTableAreSetCorrect) {
++    static bool boolValue[]{
++        true, false};
++    HardwareInfo hwInfo = *defaultHwInfo;
++    GT_SYSTEM_INFO &gtSystemInfo = hwInfo.gtSystemInfo;
++    FeatureTable &featureTable = hwInfo.featureTable;
++    WorkaroundTable &workaroundTable = hwInfo.workaroundTable;
++
++    uint64_t config = 0x0;
++    for (auto setParamBool : boolValue) {
++
++        gtSystemInfo = {0};
++        featureTable = {};
++        workaroundTable = {};
++        hardwareInfoSetup[productFamily](&hwInfo, setParamBool, config);
++
++        EXPECT_EQ(setParamBool, featureTable.ftrL3IACoherency);
++        EXPECT_EQ(setParamBool, featureTable.ftrPPGTT);
++        EXPECT_EQ(setParamBool, featureTable.ftrSVM);
++        EXPECT_EQ(setParamBool, featureTable.ftrIA32eGfxPTEs);
++        EXPECT_EQ(setParamBool, featureTable.ftrStandardMipTailFormat);
++        EXPECT_EQ(setParamBool, featureTable.ftrTranslationTable);
++        EXPECT_EQ(setParamBool, featureTable.ftrUserModeTranslationTable);
++        EXPECT_EQ(setParamBool, featureTable.ftrTileMappedResource);
++        EXPECT_EQ(setParamBool, featureTable.ftrEnableGuC);
++        EXPECT_EQ(setParamBool, featureTable.ftrFbc);
++        EXPECT_EQ(setParamBool, featureTable.ftrFbc2AddressTranslation);
++        EXPECT_EQ(setParamBool, featureTable.ftrFbcBlitterTracking);
++        EXPECT_EQ(setParamBool, featureTable.ftrFbcCpuTracking);
++        EXPECT_FALSE(featureTable.ftrTileY);
++        EXPECT_EQ(setParamBool, featureTable.ftrAstcHdr2D);
++        EXPECT_EQ(setParamBool, featureTable.ftrAstcLdr2D);
++        EXPECT_EQ(setParamBool, featureTable.ftr3dMidBatchPreempt);
++        EXPECT_EQ(setParamBool, featureTable.ftrGpGpuMidBatchPreempt);
++        EXPECT_EQ(setParamBool, featureTable.ftrGpGpuThreadGroupLevelPreempt);
++        EXPECT_EQ(setParamBool, featureTable.ftrPerCtxtPreemptionGranularityControl);
++
++        EXPECT_EQ(setParamBool, workaroundTable.wa4kAlignUVOffsetNV12LinearSurface);
++        EXPECT_EQ(setParamBool, workaroundTable.waEnablePreemptionGranularityControlByUMD);
++        EXPECT_EQ(setParamBool, workaroundTable.waUntypedBufferCompression);
++    }
++}
++
++RPLSTEST_F(RplsHwInfo, whenPlatformIsRplsThenExpectSvmIsSet) {
++    const HardwareInfo &hardwareInfo = RPLS::hwInfo;
++    EXPECT_TRUE(hardwareInfo.capabilityTable.ftrSvm);
++}
++
++RPLSTEST_F(RplsHwInfo, givenRplsWhenCheckL0ThenReturnTrue) {
++    const HardwareInfo &hardwareInfo = RPLS::hwInfo;
++    EXPECT_TRUE(hardwareInfo.capabilityTable.levelZeroSupported);
++}
+diff --git a/shared/test/common/test_macros/header/test.h b/shared/test/common/test_macros/header/test.h
+index e72490fca..b4aeda824 100644
+--- a/shared/test/common/test_macros/header/test.h
++++ b/shared/test/common/test_macros/header/test.h
+@@ -936,6 +936,16 @@ extern GFXCORE_FAMILY renderCoreFamily;
+                       IGFX_GEN12LP_CORE,          \
+                       IGFX_ALDERLAKE_P)
+ #endif
++#ifdef TESTS_RPLS
++#define RPLSTEST_F(test_fixture, test_name)                          \
++    FAMILYTEST_TEST_(test_fixture, test_name, test_fixture,          \
++                     ::testing::internal::GetTypeId<test_fixture>(), \
++                     IGFX_GEN12LP_CORE, IGFX_RAPTORLAKE_S)
++#define RPLSTEST_P(test_suite_name, test_name)    \
++    FAMILYTEST_TEST_P(test_suite_name, test_name, \
++                      IGFX_GEN12LP_CORE,          \
++                      IGFX_RAPTORLAKE_S)
++#endif
+ #ifdef TESTS_XE_HP_SDV
+ #define XEHPTEST_F(test_fixture, test_name)                          \
+     FAMILYTEST_TEST_(test_fixture, test_name, test_fixture,          \
+@@ -1130,3 +1140,4 @@ using IsTGLLP = IsProduct<IGFX_TIGERLAKE_LP>;
+ using IsRKL = IsProduct<IGFX_ROCKETLAKE>;
+ using IsXEHP = IsProduct<IGFX_XE_HP_SDV>;
+ using IsADLP = IsProduct<IGFX_ALDERLAKE_P>;
++using IsRPLS = IsProduct<IGFX_RAPTORLAKE_S>;
+diff --git a/target_unit_tests/gen12lp/rpls/CMakeLists.txt b/target_unit_tests/gen12lp/rpls/CMakeLists.txt
+new file mode 100644
+index 000000000..026517f63
+--- /dev/null
++++ b/target_unit_tests/gen12lp/rpls/CMakeLists.txt
+@@ -0,0 +1,10 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++if(TESTS_RPLS)
++  include(${CMAKE_CURRENT_SOURCE_DIR}${BRANCH_DIR_SUFFIX}/enable_rpls_testing.cmake)
++endif()
++
+diff --git a/target_unit_tests/gen12lp/rpls/enable_rpls_testing.cmake b/target_unit_tests/gen12lp/rpls/enable_rpls_testing.cmake
+new file mode 100644
+index 000000000..f760f3a69
+--- /dev/null
++++ b/target_unit_tests/gen12lp/rpls/enable_rpls_testing.cmake
+@@ -0,0 +1,10 @@
++#
++# Copyright (C) 2021 Intel Corporation
++#
++# SPDX-License-Identifier: MIT
++#
++
++if(TESTS_RPLS)
++  set(unit_test_config "rpls/1/2/8/0") # non-zero values for unit tests
++  include(${NEO_SOURCE_DIR}/cmake/run_ult_target.cmake)
++endif()
+-- 
+2.20.1
+

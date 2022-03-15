@@ -1,0 +1,31 @@
+From 8adea5d7c1aa61de51acf0987018be58965e6b4d Mon Sep 17 00:00:00 2001
+From: "Mazlan, Hazwan Arif" <hazwan.arif.mazlan@intel.com>
+Date: Mon, 18 Oct 2021 02:36:07 +0800
+Subject: [PATCH 10/11] mesa: Add PCI IDs for ADL-N platform enablement
+
+HSDES ID: NA
+
+v1: Initialize PCI ID
+
+Signed-off-by: Mazlan, Hazwan Arif <hazwan.arif.mazlan@intel.com>
+---
+ include/pci_ids/iris_pci_ids.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/pci_ids/iris_pci_ids.h b/include/pci_ids/iris_pci_ids.h
+index 62f51a6f8d21..90867c45c07a 100644
+--- a/include/pci_ids/iris_pci_ids.h
++++ b/include/pci_ids/iris_pci_ids.h
+@@ -16,6 +16,9 @@ CHIPSET(0x4692, adl_gt1, "ADL-S GT1", "Intel(R) Graphics")
+ CHIPSET(0x4693, adl_gt05, "ADL-S GT0.5", "Intel(R) Graphics")
+ CHIPSET(0x4698, adl_gt1, "ADL-S GT1", "Intel(R) Graphics")
+ CHIPSET(0x4699, adl_gt1, "ADL-S GT1", "Intel(R) Graphics")
++CHIPSET(0x46D0, adl_gt1, "ADL-N GT1", "Intel(R) Graphics")
++CHIPSET(0x46D1, adl_gt1, "ADL-N GT1", "Intel(R) Graphics")
++CHIPSET(0x46D2, adl_gt1, "ADL-N GT1", "Intel(R) Graphics")
+ 
+ CHIPSET(0xA780, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
+ CHIPSET(0xA781, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
+-- 
+2.34.1
+

@@ -1,0 +1,47 @@
+From 7c3c22c333c4139c7360cfd439e85b9cf50424c9 Mon Sep 17 00:00:00 2001
+From: "Mazlan, Hazwan Arif" <hazwan.arif.mazlan@intel.com>
+Date: Fri, 4 Mar 2022 14:54:23 +0800
+Subject: [PATCH 1/5] onevpl: Fix missing mutex init in sample common
+
+Signed-off-by: Mazlan, Hazwan Arif <hazwan.arif.mazlan@intel.com>
+---
+ .../legacy/sample_common/src/vm/thread_linux.cpp | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/tools/legacy/sample_common/src/vm/thread_linux.cpp b/tools/legacy/sample_common/src/vm/thread_linux.cpp
+index 819d811f0f05..9da67bef498c 100644
+--- a/tools/legacy/sample_common/src/vm/thread_linux.cpp
++++ b/tools/legacy/sample_common/src/vm/thread_linux.cpp
+@@ -22,6 +22,14 @@ MSDKSemaphore::MSDKSemaphore(mfxStatus& sts, mfxU32 count) : msdkSemaphoreHandle
+         // If pthread_cond_init reports an error m_semaphore was not allocated
+         throw std::bad_alloc();
+     }
++
++    res = pthread_mutex_init(&m_mutex, NULL);
++    if (res) {
++        if (!pthread_cond_destroy(&m_semaphore)) {
++            // do nothing
++        }
++        throw std::bad_alloc();
++    }
+ }
+ 
+ MSDKSemaphore::~MSDKSemaphore(void) {
+@@ -97,6 +105,14 @@ MSDKEvent::MSDKEvent(mfxStatus& sts, bool manual, bool state) : msdkEventHandle(
+         //non-zero means something is wrong, throw bad_alloc
+         throw std::bad_alloc();
+     }
++
++    res = pthread_mutex_init(&m_mutex, NULL);
++    if (res) {
++        if (!pthread_cond_destroy(&m_event)) {
++            // do nothing
++        }
++        throw std::bad_alloc();
++    }
+ }
+ 
+ MSDKEvent::~MSDKEvent(void) {
+-- 
+2.34.1
+

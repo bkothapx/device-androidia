@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Basil Chew <basil.chew@intel.com>
+Date: Thu, 19 Aug 2021 18:07:38 +0800
+Subject: [PATCH] Mixins update - Revert "Upgrade hwc api version to 2.4"
+
+---
+ caas/device.mk    | 3 ++-
+ caas/manifest.xml | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/caas/device.mk b/caas/device.mk
+index 72152b4..917b1df 100644
+--- a/caas/device.mk
++++ b/caas/device.mk
+@@ -266,7 +266,8 @@ PRODUCT_PACKAGES += android.hardware.keymaster@3.0-impl \
+                     android.hardware.graphics.mapper@4.0-impl.minigbm \
+                     android.hardware.graphics.allocator@4.0-service.minigbm \
+                     android.hardware.renderscript@1.0-impl \
+-                    android.hardware.graphics.composer@2.4-service
++                    android.hardware.graphics.composer@2.1-impl \
++                    android.hardware.graphics.composer@2.1-service
+ 
+ 
+ PRODUCT_PROPERTY_OVERRIDES += ro.control_privapp_permissions=enforce
+diff --git a/caas/manifest.xml b/caas/manifest.xml
+index 8323642..f1fa4ad 100644
+--- a/caas/manifest.xml
++++ b/caas/manifest.xml
+@@ -76,7 +76,7 @@
+     <hal format="hidl">
+         <name>android.hardware.graphics.composer</name>
+         <transport>hwbinder</transport>
+-        <version>2.4</version>
++        <version>2.1</version>
+         <interface>
+             <name>IComposer</name>
+             <instance>default</instance>
+-- 
+2.17.1
+

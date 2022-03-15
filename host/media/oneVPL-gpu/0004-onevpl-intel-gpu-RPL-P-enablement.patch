@@ -1,0 +1,35 @@
+From 9c205df61f0dd29dac0fce9c6f24874edd21ebd2 Mon Sep 17 00:00:00 2001
+From: "Mazlan, Hazwan Arif" <hazwan.arif.mazlan@intel.com>
+Date: Thu, 10 Feb 2022 13:25:27 +0800
+Subject: [PATCH 4/4] onevpl-intel-gpu: RPL-P enablement
+
+Bspecs: 55374
+HSDES ID: NA
+
+Signed-off-by: Mazlan, Hazwan Arif <hazwan.arif.mazlan@intel.com>
+---
+ _studio/shared/include/mfxstructures-int.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/_studio/shared/include/mfxstructures-int.h b/_studio/shared/include/mfxstructures-int.h
+index 716d752d22c6..c7508c6d8c43 100644
+--- a/_studio/shared/include/mfxstructures-int.h
++++ b/_studio/shared/include/mfxstructures-int.h
+@@ -518,6 +518,14 @@ typedef struct {
+     { 0xA781, MFX_HW_RPL_S, MFX_GT1 },//RPL-S
+     { 0xA782, MFX_HW_RPL_S, MFX_GT1 },//RPL-S
+     { 0xA783, MFX_HW_RPL_S, MFX_GT1 },//RPL-S
++
++    /*RPL-P*/
++    { 0xA7A0, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
++    { 0xA720, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
++    { 0xA7A8, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
++    { 0xA7A1, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
++    { 0xA721, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
++    { 0xA7A9, MFX_HW_ADL_P, MFX_GT2 },//RPL-P
+ };
+ 
+ /*
+-- 
+2.34.1
+

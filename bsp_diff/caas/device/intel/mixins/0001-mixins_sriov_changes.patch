@@ -1,0 +1,90 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kalyan Alle <kalyan.alle@intel.com>
+Date: Mon, 19 Apr 2021 20:39:23 -0400
+Subject: [PATCH] mixins_sriov_changes
+
+---
+diff --git a/groups/device-specific/caas/init.rc b/groups/device-specific/caas/init.rc
+index ea10bd9..7793f8b 100644
+--- a/groups/device-specific/caas/init.rc
++++ b/groups/device-specific/caas/init.rc
+@@ -41,3 +41,12 @@ on post-fs
+     insmod /vendor/lib/modules/asix.ko
+     insmod /vendor/lib/modules/r8152.ko
+     insmod /vendor/lib/modules/r8169.ko
++    insmod /vendor/lib/modules/kvmfr.ko
++    chown system system /dev/uio0
++    chown system system /dev/kvmfr0
++
++#       grep -q '^uio'   /proc/modules || sudo modprobe uio
++#       grep -q '^kvmfr' /proc/modules && sudo rmmod kvmfr || true
++#       sudo insmod ./kvmfr.ko
++#       sudo chown $(USER) /dev/uio0
++#       sudo chown $(USER) /dev/kvmfr0
+diff --git a/groups/graphics/auto/BoardConfig.mk b/groups/graphics/auto/BoardConfig.mk
+index f3d6c15..47b18a0 100755
+--- a/groups/graphics/auto/BoardConfig.mk
++++ b/groups/graphics/auto/BoardConfig.mk
+@@ -15,6 +15,7 @@ endif
+
+ ifeq ($(BASE_LTS2020_YOCTO_KERNEL),true)
+ BOARD_KERNEL_CMDLINE += i915.enable_guc=1
++BOARD_KERNEL_CMDLINE += i915.force_probe=*
+ endif
+
+ USE_OPENGL_RENDERER := true
+diff --git a/groups/graphics/auto/init.rc.1 b/groups/graphics/auto/init.rc.1
+index 6adb52c..05e8af3 100644
+--- a/groups/graphics/auto/init.rc.1
++++ b/groups/graphics/auto/init.rc.1
+@@ -20,8 +20,8 @@ service hdcpd /system/vendor/bin/hdcpd
+     seclabel u:r:hdcpd:s0
+ {{/coreu_msync}}
+ 
+-on property:vendor.hwc.ready=1
+-    start hdcpd
++#on property:vendor.hwc.ready=1
++#    start hdcpd
+ 
+ on post-fs-data
+     # Change ownership of pci syfs file to 'media', as hdcpd runs as 'media'
+@@ -29,7 +29,7 @@ on post-fs-data
+     mkdir /data/system 0770 system system
+     {{#coreu_msync}}
+     mkdir /data/vendor/coreu 0770 media root
+-    mkdir /data/vendor/hdcp 0770 media root
++#    mkdir /data/vendor/hdcp 0770 media root
+     {{/coreu_msync}}
+ on boot
+     #Give permission to system to use i915_videostatus sysfs interface
+diff --git a/groups/graphics/mesa/init.rc.1 b/groups/graphics/mesa/init.rc.1
+index 752ae6b..e6f7955 100644
+--- a/groups/graphics/mesa/init.rc.1
++++ b/groups/graphics/mesa/init.rc.1
+@@ -13,15 +13,6 @@ service coreu /system/vendor/bin/coreu
+ # Note that this service must start as root to set up a mem-mapped region
+ # and once that is set up it will drop all unnecessary capabilities and
+ # will not show up as a root process in the steady state.
+-service hdcpd /system/vendor/bin/hdcpd
+-    disabled
+-    user media
+-    group media shell
+-    seclabel u:r:hdcpd:s0
+-{{/coreu_msync}}
+-
+-on property:vendor.hwc.ready=1
+-    start hdcpd
+ 
+ on post-fs-data
+     # Change ownership of pci syfs file to 'media', as hdcpd runs as 'media'
+@@ -29,7 +20,6 @@ on post-fs-data
+     mkdir /data/system 0770 system system
+     {{#coreu_msync}}
+     mkdir /data/vendor/coreu 0770 media root
+-    mkdir /data/vendor/hdcp 0770 media root
+     {{/coreu_msync}}
+ on boot
+     #Give permission to system to use i915_videostatus sysfs interface
+-- 
+2.17.1
+
