@@ -7,7 +7,7 @@ Subject: [PATCH] Enable GUC for HWC support
 Signed-off-by: Kalenahally Madegowda, NandishaX <nandishax.kalenahally.madegowda@intel.com>
 
 diff --git a/groups/graphics/auto/BoardConfig.mk b/groups/graphics/auto/BoardConfig.mk
-index c466a88..f50ff87 100644
+index f3d6c15..60da9e1 100755
 --- a/groups/graphics/auto/BoardConfig.mk
 +++ b/groups/graphics/auto/BoardConfig.mk
 @@ -5,7 +5,11 @@ LIBDRM_VER ?= intel
@@ -21,15 +21,18 @@ index c466a88..f50ff87 100644
 +endif
  {{/enable_guc}}
  {{/acrn-guest}}
- 
-@@ -14,7 +18,6 @@ BOARD_KERNEL_CMDLINE += i915.enable_guc=2
+
+@@ -13,10 +17,6 @@ ifeq ($(BASE_YOCTO_KERNEL),true)
+ BOARD_KERNEL_CMDLINE += i915.enable_guc=2
  endif
- 
- ifeq ($(BASE_LTS2020_YOCTO_KERNEL),true)
+
+-ifeq ($(BASE_LTS2020_YOCTO_KERNEL),true)
 -BOARD_KERNEL_CMDLINE += i915.enable_guc=1
- BOARD_KERNEL_CMDLINE += i915.force_probe=*
- endif
- 
+-endif
+-
+ USE_OPENGL_RENDERER := true
+ USE_INTEL_UFO_DRIVER := false
+ BOARD_GPU_DRIVERS := i965 swrast virgl iris
 -- 
 2.35.1
 
