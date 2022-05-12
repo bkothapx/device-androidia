@@ -1,10 +1,16 @@
-From 7381a656406174df30fac67588576b81da46239c Mon Sep 17 00:00:00 2001
-From: "Kothapeta, BikshapathiX" <bikshapathix.kothapeta@intel.com>
-Date: Fri, 25 Feb 2022 09:52:35 +0530
+From e2f63211d7eff4333a2c8d1465cb441b4b315f69 Mon Sep 17 00:00:00 2001
+From: "Suresh, Prashanth" <prashanth.suresh@intel.com>
+Date: Wed, 11 May 2022 15:59:47 +0530
 Subject: [PATCH] Create Media codecs_performance.xml
 
 Tracked-On: GFXSRIOV-218
-Signed-off-by: Kothapeta, BikshapathiX <bikshapathix.kothapeta@intel.com>
+---
+ groups/codecs/configurable/auto_hal.in        |   6 +
+ groups/codecs/configurable/files.spec         |   1 +
+ .../media_codecs_performance_adl.xml          | 191 ++++++++++++++++++
+ groups/codecs/configurable/product.mk         |   3 +-
+ 4 files changed, 200 insertions(+), 1 deletion(-)
+ create mode 100755 groups/codecs/configurable/media_codecs_performance_adl.xml
 
 diff --git a/groups/codecs/configurable/auto_hal.in b/groups/codecs/configurable/auto_hal.in
 index eab9dfb..281a348 100644
@@ -36,8 +42,8 @@ index e462830..ec3ea24 100644
  media_codecs_vp9.xml: "vp9 support"
  mfx_omxil_core_vp9.conf: "vp9 support"
 diff --git a/groups/codecs/configurable/media_codecs_performance_adl.xml b/groups/codecs/configurable/media_codecs_performance_adl.xml
-new file mode 100644
-index 0000000..b3d9f50
+new file mode 100755
+index 0000000..fd5145c
 --- /dev/null
 +++ b/groups/codecs/configurable/media_codecs_performance_adl.xml
 @@ -0,0 +1,191 @@
@@ -232,20 +238,21 @@ index 0000000..b3d9f50
 +        </MediaCodec>
 +    </Encoders>
 +</MediaCodecs>
++
 diff --git a/groups/codecs/configurable/product.mk b/groups/codecs/configurable/product.mk
-index 4390628..61d715b 100644
+index fd27bc4..b12eee3 100644
 --- a/groups/codecs/configurable/product.mk
 +++ b/groups/codecs/configurable/product.mk
-@@ -24,7 +24,8 @@ endif
+@@ -29,7 +29,8 @@ endif
  PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/{{_extra_dir}}/media_codecs_performance_{{platform}}.xml:vendor/etc/media_codecs_performance.xml \
      $(LOCAL_PATH)/{{_extra_dir}}/media_codecs_performance_cml.xml:vendor/etc/media_codecs_performance_cml.xml \
 -    $(LOCAL_PATH)/{{_extra_dir}}/media_codecs_performance_tgl.xml:vendor/etc/media_codecs_performance_tgl.xml
 +    $(LOCAL_PATH)/{{_extra_dir}}/media_codecs_performance_tgl.xml:vendor/etc/media_codecs_performance_tgl.xml \
 +    $(LOCAL_PATH)/{{_extra_dir}}/media_codecs_performance_adl.xml:vendor/etc/media_codecs_performance_adl.xml
+ {{/hw_omx_video}}
  {{/codec_perf_xen}}
- {{#codec_perf_xen}}
- PRODUCT_COPY_FILES += \
+ 
 -- 
-2.35.1
+2.36.1
 

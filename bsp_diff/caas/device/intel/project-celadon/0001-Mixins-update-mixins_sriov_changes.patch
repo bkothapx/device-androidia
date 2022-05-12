@@ -1,22 +1,25 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Basil Chew <basil.chew@intel.com>
-Date: Thu, 19 Aug 2021 16:56:28 +0800
+From b46191611cdcd2ad1a2590d97600542e165beade Mon Sep 17 00:00:00 2001
+From: "Suresh, Prashanth" <prashanth.suresh@intel.com>
+Date: Wed, 11 May 2022 17:01:14 +0530
 Subject: [PATCH] Mixins update - mixins_sriov_changes
 
 ---
+ caas/extra_files/media/auto_hal.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/caas/extra_files/media/auto_hal.in b/caas/extra_files/media/auto_hal.in
-index f307863..5c7be0a 100644
+index c305683..ea3813d 100644
 --- a/caas/extra_files/media/auto_hal.in
 +++ b/caas/extra_files/media/auto_hal.in
-@@ -14,7 +14,7 @@ case "$(cat /proc/fb)" in
-                 ;;
-         *)
-                 echo "software codec"
--                setprop vendor.intel.video.codec software
-+                setprop vendor.intel.video.codec hardware
+@@ -18,7 +18,7 @@ case "$(cat /proc/fb)" in
+                        setprop vendor.intel.video.codec hardware
+                 else
+                        echo "software codec"
+-                       setprop vendor.intel.video.codec software
++                       setprop vendor.intel.video.codec hardware
+                 fi
                  ;;
  esac
- }
 -- 
-2.17.1
+2.36.1
 

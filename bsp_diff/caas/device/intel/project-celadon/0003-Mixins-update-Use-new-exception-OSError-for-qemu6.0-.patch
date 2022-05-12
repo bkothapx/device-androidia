@@ -1,32 +1,20 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Basil Chew <basil.chew@intel.com>
-Date: Tue, 9 Nov 2021 15:11:53 +0800
-Subject: [PATCH] Mixins update - Use new exception OSError for qemu6.0 qmp.py
+From 56e7948562859925e198385cd7a062212de71027 Mon Sep 17 00:00:00 2001
+From: "Suresh, Prashanth" <prashanth.suresh@intel.com>
+Date: Wed, 11 May 2022 14:59:05 +0530
+Subject: [PATCH] [PATCH] Mixins update - Use new exception OSError for qemu6.0
+ qmp.py
 
 ---
- caas/guest_pm_control | 6 +++---
- caas/wakeup.py        | 5 +++--
- 2 files changed, 6 insertions(+), 5 deletions(-)
+ caas/guest_pm_control | 2 ++
+ caas/wakeup.py        | 2 ++
+ 2 files changed, 4 insertions(+)
 
 diff --git a/caas/guest_pm_control b/caas/guest_pm_control
-index ce151e3..c57f675 100755
+index b5017d2..529cdd4 100755
 --- a/caas/guest_pm_control
 +++ b/caas/guest_pm_control
-@@ -21,7 +21,7 @@ import glob
- import subprocess
- from sys import argv,exit
- 
--sys.path.append(os.path.join(os.path.dirname(__file__), '../qemu-4.2.0/python'))
-+sys.path.append(os.path.join(os.path.dirname(__file__), '../qemu-6.0.0/python'))
- from qemu import qmp
- 
- rtc_wakeup = 0
-@@ -79,10 +79,10 @@ def main():
-             print('Didn\'t get QMP greeting message from QEMU QMP server')
-         except qmp.QMPCapabilitiesError:
+@@ -91,6 +91,8 @@ def main():
              print('Could not negotiate capabilities with QEMU QMP server')
--        except qemu.error:
--            print
          except qmp.QMPTimeoutError:
              print('Connection Timeout Error')
 +        except OSError:
@@ -35,33 +23,18 @@ index ce151e3..c57f675 100755
              print("connected to QEMU QMP server")
              break
 diff --git a/caas/wakeup.py b/caas/wakeup.py
-index 7edc528..fef0b03 100755
+index 9565fba..0ee3c0e 100755
 --- a/caas/wakeup.py
 +++ b/caas/wakeup.py
-@@ -8,7 +8,7 @@ from sys import argv,exit
- 
- timeout = 60
- 
--sys.path.append(os.path.join(os.path.dirname(__file__), '../qemu-4.2.0/python'))
-+sys.path.append(os.path.join(os.path.dirname(__file__), '../qemu-6.0.0/python'))
- 
- from qemu import qmp
- 
-@@ -23,12 +23,13 @@ def main():
+@@ -23,6 +23,8 @@ def main():
              print('Didn\'t get QMP greeting message from QEMU QMP server')
          except qmp.QMPCapabilitiesError:
              print('Could not negotiate capabilities with QEMU QMP server')
--        except qemu.error:
 +        except OSError:
-             print
++            print
  
          if time.time() >= timeout + timeout_start:
              print("connection timeout error")
-             return
-+
-     resp = qemu.cmd('query-status')
-     if resp != None:
-         for val in resp.values():
 -- 
-2.17.1
+2.36.1
 
