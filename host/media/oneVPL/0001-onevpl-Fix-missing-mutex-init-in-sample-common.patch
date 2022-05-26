@@ -1,7 +1,7 @@
 From 7c3c22c333c4139c7360cfd439e85b9cf50424c9 Mon Sep 17 00:00:00 2001
 From: "Mazlan, Hazwan Arif" <hazwan.arif.mazlan@intel.com>
 Date: Fri, 4 Mar 2022 14:54:23 +0800
-Subject: [PATCH 1/5] onevpl: Fix missing mutex init in sample common
+Subject: [PATCH 1/6] onevpl: Fix missing mutex init in sample common
 
 Signed-off-by: Mazlan, Hazwan Arif <hazwan.arif.mazlan@intel.com>
 ---

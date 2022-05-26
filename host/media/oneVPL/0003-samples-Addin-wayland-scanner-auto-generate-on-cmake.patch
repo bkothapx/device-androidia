@@ -1,7 +1,7 @@
 From 4a51e9a0668d1c7e99a03d02491be55f8a23eef8 Mon Sep 17 00:00:00 2001
 From: "Ung, Teng En" <teng.en.ung@intel.com>
 Date: Tue, 25 Jan 2022 16:36:19 +0800
-Subject: [PATCH 3/5] samples: Addin wayland-scanner auto generate on cmake.
+Subject: [PATCH 3/6] samples: Addin wayland-scanner auto generate on cmake.
 
 Upstream-Status: Submitted
 innersource PR #269

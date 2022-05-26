@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Basil Chew <basil.chew@intel.com>
+Date: Mon, 14 Mar 2022 15:44:15 +0800
+Subject: [PATCH] Mixins update - Enable GUC for HWC support
+
+---
+ caas/BoardConfig.mk | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/caas/BoardConfig.mk b/caas/BoardConfig.mk
+index f4bbe57..2d10e51 100644
+--- a/caas/BoardConfig.mk
++++ b/caas/BoardConfig.mk
+@@ -448,13 +448,17 @@ TARGET_USE_PRIVATE_LIBDRM := true
+ LIBDRM_VER ?= intel
+ 
+ BOARD_KERNEL_CMDLINE += vga=current i915.modeset=1 drm.atomic=1 i915.nuclear_pageflip=1 drm.vblankoffdelay=1 i915.fastboot=1
++ifeq ($(BASE_LTS2020_YOCTO_KERNEL),true)
++BOARD_KERNEL_CMDLINE += i915.enable_guc=1
++else
++BOARD_KERNEL_CMDLINE += i915.enable_guc=2
++endif
+ 
+ ifeq ($(BASE_YOCTO_KERNEL),true)
+ BOARD_KERNEL_CMDLINE += i915.enable_guc=2
+ endif
+ 
+ ifeq ($(BASE_LTS2020_YOCTO_KERNEL),true)
+-BOARD_KERNEL_CMDLINE += i915.enable_guc=1
+ BOARD_KERNEL_CMDLINE += i915.force_probe=* i915.disable_display=1
+ endif
+ 
+-- 
+2.17.1
+

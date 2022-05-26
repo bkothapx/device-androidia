@@ -1,7 +1,7 @@
 From 230f7a74f615383cf19d230b0836e3304670909f Mon Sep 17 00:00:00 2001
 From: "Ung, Teng En" <teng.en.ung@intel.com>
 Date: Fri, 8 Oct 2021 14:19:40 +0000
-Subject: [PATCH 4/5] sample_misc: Addin basic wayland dmabuf support.
+Subject: [PATCH 4/6] sample_misc: Addin basic wayland dmabuf support.
 
 Upstream-Status: Submitted
 innersource PR #269

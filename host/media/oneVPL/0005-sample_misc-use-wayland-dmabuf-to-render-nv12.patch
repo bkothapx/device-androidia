@@ -1,7 +1,7 @@
 From 5f38712883ee50990073d5815348b5868333acb3 Mon Sep 17 00:00:00 2001
 From: "Ung, Teng En" <teng.en.ung@intel.com>
 Date: Fri, 8 Oct 2021 14:38:45 +0000
-Subject: [PATCH 5/5] sample_misc: use wayland dmabuf to render nv12
+Subject: [PATCH 5/6] sample_misc: use wayland dmabuf to render nv12
 
 Upstream-Status: Submitted
 innersource PR #269

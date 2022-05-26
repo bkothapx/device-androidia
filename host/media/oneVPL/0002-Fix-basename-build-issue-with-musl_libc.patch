@@ -1,7 +1,7 @@
 From 75d9ef01339e35fd0ebb03c4c9b72217c644550d Mon Sep 17 00:00:00 2001
 From: "Yew, Chang Ching" <chang.ching.yew@intel.com>
 Date: Mon, 24 Jan 2022 20:49:50 +0800
-Subject: [PATCH 2/5] Fix basename() build issue with musl_libc
+Subject: [PATCH 2/6] Fix basename() build issue with musl_libc
 
 Upstream-Status: Submitted
 innersource PR #264

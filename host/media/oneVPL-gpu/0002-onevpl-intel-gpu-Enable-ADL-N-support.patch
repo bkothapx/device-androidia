@@ -1,4 +1,4 @@
-From aa0f2243f1ec411dba6c7219b74bf740f01bcb53 Mon Sep 17 00:00:00 2001
+From 433d8e60c935d26623ee06f403f9d6150eb3b86b Mon Sep 17 00:00:00 2001
 From: "Yew, Chang Ching" <chang.ching.yew@intel.com>
 Date: Thu, 27 Jan 2022 18:03:24 +0800
 Subject: [PATCH 2/4] onevpl-intel-gpu: Enable ADL-N support
@@ -34,7 +34,7 @@ index 1846829da156..d89821127305 100644
  } GPU_PLATFORM;
  
 diff --git a/_studio/mfx_lib/encode_hw/h264/src/mfx_h264_enc_common_hw.cpp b/_studio/mfx_lib/encode_hw/h264/src/mfx_h264_enc_common_hw.cpp
-index 73b5124f5261..cd68a41ed2e5 100644
+index a4c19f3e8e7d..1b21b2af0599 100644
 --- a/_studio/mfx_lib/encode_hw/h264/src/mfx_h264_enc_common_hw.cpp
 +++ b/_studio/mfx_lib/encode_hw/h264/src/mfx_h264_enc_common_hw.cpp
 @@ -1328,7 +1328,7 @@ bool MfxHwH264Encode::IsExtBrcSceneChangeSupported(
@@ -59,10 +59,10 @@ index 6bc50916f15b..92f9b0889b52 100644
          m_program = ReadProgram(m_device, genx_simple_me_gen12lp, SizeOf(genx_simple_me_gen12lp));
          m_programHist = ReadProgram(m_device, genx_histogram_gen12lp, SizeOf(genx_histogram_gen12lp));
 diff --git a/_studio/mfx_lib/shared/src/mfx_common_int.cpp b/_studio/mfx_lib/shared/src/mfx_common_int.cpp
-index b7ef2bfd078b..036028e81570 100644
+index 18f32bf60159..a5aeb3f2c670 100644
 --- a/_studio/mfx_lib/shared/src/mfx_common_int.cpp
 +++ b/_studio/mfx_lib/shared/src/mfx_common_int.cpp
-@@ -1196,6 +1196,7 @@ mfxPlatform MakePlatform(eMFXHWType type, mfxU16 device_id)
+@@ -1195,6 +1195,7 @@ mfxPlatform MakePlatform(eMFXHWType type, mfxU16 device_id)
                           platform.CodeName = MFX_PLATFORM_TIGERLAKE;     break;
      case MFX_HW_ADL_S  : platform.CodeName = MFX_PLATFORM_ALDERLAKE_S;   break;
      case MFX_HW_ADL_P  : platform.CodeName = MFX_PLATFORM_ALDERLAKE_P;   break;
@@ -71,7 +71,7 @@ index b7ef2bfd078b..036028e81570 100644
      case MFX_HW_DG2    :
                           platform.MediaAdapterType = MFX_MEDIA_DISCRETE;
 diff --git a/_studio/mfx_lib/vpp/src/mfx_vpp_hw.cpp b/_studio/mfx_lib/vpp/src/mfx_vpp_hw.cpp
-index 50cf16432c65..7f4b96ef9acb 100644
+index 09b42e902ef9..2f15abaa2ac2 100644
 --- a/_studio/mfx_lib/vpp/src/mfx_vpp_hw.cpp
 +++ b/_studio/mfx_lib/vpp/src/mfx_vpp_hw.cpp
 @@ -2440,6 +2440,7 @@ mfxStatus  VideoVPPHW::Init(
@@ -104,7 +104,7 @@ index c5022eac4078..45289cc41ea2 100644
          break;
      default:
 diff --git a/_studio/shared/include/mfxstructures-int.h b/_studio/shared/include/mfxstructures-int.h
-index f5dfa56fb250..716d752d22c6 100644
+index 04284317a368..ffc7ca994713 100644
 --- a/_studio/shared/include/mfxstructures-int.h
 +++ b/_studio/shared/include/mfxstructures-int.h
 @@ -79,6 +79,7 @@ enum eMFXHWType

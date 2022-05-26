@@ -1,4 +1,4 @@
-From 0bd21e9ea99f0cd0e851eaa3ff5d6f5a87172bf3 Mon Sep 17 00:00:00 2001
+From 51d64990d3e0fe2e1ec1ca3184ac58953bdb63bd Mon Sep 17 00:00:00 2001
 From: Dmitry Rogozhkin <dmitry.v.rogozhkin@intel.com>
 Date: Wed, 9 Feb 2022 16:35:46 -0800
 Subject: [PATCH 3/4] build: fix build with gcc-11
@@ -14,7 +14,7 @@ Signed-off-by: Anuj Mittal <anuj.mittal@intel.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/_studio/shared/mfx_logging/include/mfx_utils_logging.h b/_studio/shared/mfx_logging/include/mfx_utils_logging.h
-index e48928b3f81c..af6af8d2e439 100644
+index a3110293fd14..a79b5956aa05 100644
 --- a/_studio/shared/mfx_logging/include/mfx_utils_logging.h
 +++ b/_studio/shared/mfx_logging/include/mfx_utils_logging.h
 @@ -25,6 +25,7 @@
