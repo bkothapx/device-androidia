@@ -1,0 +1,81 @@
+From 1c622ea966b3f244f1cb33f6e35b1dc14eb53de3 Mon Sep 17 00:00:00 2001
+From: Kenneth Graunke <kenneth@whitecape.org>
+Date: Thu, 20 May 2021 10:53:39 -0700
+Subject: [PATCH 04/20] iris: Make an iris_bo_is_external() helper and use it
+ in a few places
+
+I'd like to start tracking "imported" vs. "exported" for objects,
+rather than a blanket "external" flag.  Instead of directly checking
+bo->external, use a new helper that will eventually be "imported or
+exported".
+
+Acked-by: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/10941>
+
+diff --git a/src/gallium/drivers/iris/iris_bufmgr.c b/src/gallium/drivers/iris/iris_bufmgr.c
+index 70042da13d9..60f2f094202 100644
+--- a/src/gallium/drivers/iris/iris_bufmgr.c
++++ b/src/gallium/drivers/iris/iris_bufmgr.c
+@@ -198,7 +198,7 @@ find_and_ref_external_bo(struct hash_table *ht, unsigned int key)
+    struct iris_bo *bo = entry ? entry->data : NULL;
+ 
+    if (bo) {
+-      assert(bo->external);
++      assert(iris_bo_is_external(bo));
+       assert(!bo->reusable);
+ 
+       /* Being non-reusable, the BO cannot be in the cache lists, but it
+@@ -749,7 +749,7 @@ bo_close(struct iris_bo *bo)
+ {
+    struct iris_bufmgr *bufmgr = bo->bufmgr;
+ 
+-   if (bo->external) {
++   if (iris_bo_is_external(bo)) {
+       struct hash_entry *entry;
+ 
+       if (bo->global_name) {
+@@ -1284,7 +1284,7 @@ iris_bo_wait(struct iris_bo *bo, int64_t timeout_ns)
+    struct iris_bufmgr *bufmgr = bo->bufmgr;
+ 
+    /* If we know it's idle, don't bother with the kernel round trip */
+-   if (bo->idle && !bo->external)
++   if (bo->idle && !iris_bo_is_external(bo))
+       return 0;
+ 
+    struct drm_i915_gem_wait wait = {
+diff --git a/src/gallium/drivers/iris/iris_bufmgr.h b/src/gallium/drivers/iris/iris_bufmgr.h
+index 91c03ab35e3..7e666242f2d 100644
+--- a/src/gallium/drivers/iris/iris_bufmgr.h
++++ b/src/gallium/drivers/iris/iris_bufmgr.h
+@@ -342,6 +342,15 @@ void iris_bufmgr_unref(struct iris_bufmgr *bufmgr);
+  */
+ int iris_bo_flink(struct iris_bo *bo, uint32_t *name);
+ 
++/**
++ * Is this buffer shared with external clients (imported or exported)?
++ */
++static inline bool
++iris_bo_is_external(const struct iris_bo *bo)
++{
++   return bo->external;
++}
++
+ /**
+  * Make a BO externally accessible.
+  *
+diff --git a/src/gallium/drivers/iris/iris_resource.h b/src/gallium/drivers/iris/iris_resource.h
+index 5ef6ad8d745..2b062bc4bc0 100644
+--- a/src/gallium/drivers/iris/iris_resource.h
++++ b/src/gallium/drivers/iris/iris_resource.h
+@@ -297,7 +297,7 @@ iris_mocs(const struct iris_bo *bo,
+           const struct isl_device *dev,
+           isl_surf_usage_flags_t usage)
+ {
+-   return isl_mocs(dev, usage, bo && bo->external);
++   return isl_mocs(dev, usage, bo && iris_bo_is_external(bo));
+ }
+ 
+ struct iris_format_info iris_format_for_usage(const struct gen_device_info *,
+-- 
+2.36.1
+

@@ -1,0 +1,70 @@
+From 29ae5b2e0b9940de6e9a9ff00db267f9b1729c27 Mon Sep 17 00:00:00 2001
+From: Kenneth Graunke <kenneth@whitecape.org>
+Date: Wed, 12 May 2021 22:19:42 -0700
+Subject: [PATCH 01/20] iris: Replace no_gpu flag with PIPE_MAP_DIRECTLY
+
+Here, we're deciding when to map the buffer directly, rather than using
+the GPU to blit to/from a temporary.  There is already a flag for that,
+PIPE_MAP_DIRECTLY, which has the added benefit of not being a negative
+(such as "no_gpu").
+
+Currently, we intend to map directly if:
+
+1. Direct mappings were requested explicitly
+2. Persistent or coherent mappings were requested (and so we must)
+3. ASTC textures (we currently can't blit those correctly)
+4. There is no need for a temporary (there's no image compression that
+   the CPU wouldn't understand, and we don't need to avoid stalls due
+   to the buffer being busy on the GPU)
+
+Expressing "please memory map this directly" is easier to follow than
+"please don't use the GPU as part of mapping this".
+
+Acked-by: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/10941>
+
+diff --git a/src/gallium/drivers/iris/iris_resource.c b/src/gallium/drivers/iris/iris_resource.c
+index a2ad53fbd3b..6c29d46ecae 100644
+--- a/src/gallium/drivers/iris/iris_resource.c
++++ b/src/gallium/drivers/iris/iris_resource.c
+@@ -1979,9 +1979,8 @@ iris_transfer_map(struct pipe_context *ctx,
+     * contain state we're constructing for a GPU draw call, which would
+     * kill us with infinite stack recursion.
+     */
+-   bool no_gpu = usage & (PIPE_MAP_PERSISTENT |
+-                          PIPE_MAP_COHERENT |
+-                          PIPE_MAP_DIRECTLY);
++   if (usage & (PIPE_MAP_PERSISTENT | PIPE_MAP_COHERENT))
++      usage |= PIPE_MAP_DIRECTLY;
+ 
+    /* GPU copies are not useful for buffer reads.  Instead of stalling to
+     * read from the original buffer, we'd simply copy it to a temporary...
+@@ -1994,20 +1993,19 @@ iris_transfer_map(struct pipe_context *ctx,
+     */
+    if (!(usage & PIPE_MAP_DISCARD_RANGE) &&
+        !iris_has_invalid_primary(res, level, 1, box->z, box->depth)) {
+-      no_gpu = true;
++      usage |= PIPE_MAP_DIRECTLY;
+    }
+ 
+    const struct isl_format_layout *fmtl = isl_format_get_layout(surf->format);
+    if (fmtl->txc == ISL_TXC_ASTC)
+-      no_gpu = true;
++      usage |= PIPE_MAP_DIRECTLY;
+ 
+    if (!map_would_stall &&
+-       res->aux.usage != ISL_AUX_USAGE_CCS_E &&
+-       res->aux.usage != ISL_AUX_USAGE_GFX12_CCS_E) {
+-      no_gpu = true;
++       !isl_aux_usage_has_compression(res->aux.usage)) {
++      usage |= PIPE_MAP_DIRECTLY;
+    }
+ 
+-   if (!no_gpu) {
++   if (!(usage & PIPE_MAP_DIRECTLY)) {
+       /* If we need a synchronous mapping and the resource is busy, or needs
+        * resolving, we copy to/from a linear temporary buffer using the GPU.
+        */
+-- 
+2.36.1
+

@@ -1,0 +1,225 @@
+From cf72120b8a56cc3ec323a3286b73da46e17fa388 Mon Sep 17 00:00:00 2001
+From: Kenneth Graunke <kenneth@whitecape.org>
+Date: Thu, 20 May 2021 10:55:53 -0700
+Subject: [PATCH 05/20] iris: Track imported vs. exported status separately
+
+Not all external objects are the same.  Imported buffers may be from
+other devices (say a dmabuf from an AMD or NVIDIA discrete card) which
+are backed by memory that we can't use with I915_GEM_MMAP.  However,
+exported buffers are ones that we know we allocated ourselves from our
+own device.  We may not know what other clients are doing with them,
+but we can assume a bit more about where they came from.
+
+Acked-by: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/10941>
+Signed-off-by: Kothapeta, BikshapathiX <bikshapathix.kothapeta@intel.com>
+
+diff --git a/src/gallium/drivers/iris/iris_bufmgr.c b/src/gallium/drivers/iris/iris_bufmgr.c
+index 60f2f094202..f9e6c712002 100644
+--- a/src/gallium/drivers/iris/iris_bufmgr.c
++++ b/src/gallium/drivers/iris/iris_bufmgr.c
+@@ -717,7 +717,7 @@ iris_bo_gem_create_from_name(struct iris_bufmgr *bufmgr,
+    bo->name = name;
+    bo->global_name = handle;
+    bo->reusable = false;
+-   bo->external = true;
++   bo->imported = true;
+    bo->kflags = EXEC_OBJECT_SUPPORTS_48B_ADDRESS | EXEC_OBJECT_PINNED;
+    bo->gtt_offset = vma_alloc(bufmgr, IRIS_MEMZONE_OTHER, bo->size, 1);
+ 
+@@ -1425,7 +1425,7 @@ iris_bo_import_dmabuf(struct iris_bufmgr *bufmgr, int prime_fd,
+    bo->bufmgr = bufmgr;
+    bo->name = "prime";
+    bo->reusable = false;
+-   bo->external = true;
++   bo->imported = true;
+    bo->kflags = EXEC_OBJECT_SUPPORTS_48B_ADDRESS | EXEC_OBJECT_PINNED;
+ 
+    /* From the Bspec, Memory Compression - Gfx12:
+@@ -1467,33 +1467,89 @@ err:
+    return NULL;
+ }
+ 
++struct iris_bo *
++iris_bo_import_dmabuf_no_mods(struct iris_bufmgr *bufmgr,
++                              int prime_fd)
++{
++   uint32_t handle;
++   struct iris_bo *bo;
++
++   mtx_lock(&bufmgr->lock);
++   int ret = drmPrimeFDToHandle(bufmgr->fd, prime_fd, &handle);
++   if (ret) {
++      DBG("import_dmabuf: failed to obtain handle from fd: %s\n",
++          strerror(errno));
++      mtx_unlock(&bufmgr->lock);
++      return NULL;
++   }
++
++   /*
++    * See if the kernel has already returned this buffer to us. Just as
++    * for named buffers, we must not create two bo's pointing at the same
++    * kernel object
++    */
++   bo = find_and_ref_external_bo(bufmgr->handle_table, handle);
++   if (bo)
++      goto out;
++
++   bo = bo_calloc();
++   if (!bo)
++      goto out;
++
++   p_atomic_set(&bo->refcount, 1);
++
++   /* Determine size of bo.  The fd-to-handle ioctl really should
++    * return the size, but it doesn't.  If we have kernel 3.12 or
++    * later, we can lseek on the prime fd to get the size.  Older
++    * kernels will just fail, in which case we fall back to the
++    * provided (estimated or guess size). */
++   ret = lseek(prime_fd, 0, SEEK_END);
++   if (ret != -1)
++      bo->size = ret;
++
++   bo->bufmgr = bufmgr;
++   bo->name = "prime";
++   bo->reusable = false;
++   bo->imported = true;
++   bo->kflags = EXEC_OBJECT_SUPPORTS_48B_ADDRESS | EXEC_OBJECT_PINNED;
++   bo->gtt_offset = vma_alloc(bufmgr, IRIS_MEMZONE_OTHER, bo->size, 1);
++   bo->gem_handle = handle;
++   _mesa_hash_table_insert(bufmgr->handle_table, &bo->gem_handle, bo);
++
++out:
++   mtx_unlock(&bufmgr->lock);
++   return bo;
++}
++
+ static void
+-iris_bo_make_external_locked(struct iris_bo *bo)
++iris_bo_mark_exported_locked(struct iris_bo *bo)
+ {
+-   if (!bo->external) {
++   if (!iris_bo_is_external(bo))
+       _mesa_hash_table_insert(bo->bufmgr->handle_table, &bo->gem_handle, bo);
++
++   if (!bo->exported) {
+       /* If a BO is going to be used externally, it could be sent to the
+        * display HW. So make sure our CPU mappings don't assume cache
+        * coherency since display is outside that cache.
+        */
+       bo->cache_coherent = false;
+-      bo->external = true;
++      bo->exported = true;
+       bo->reusable = false;
+    }
+ }
+ 
+ void
+-iris_bo_make_external(struct iris_bo *bo)
++iris_bo_mark_exported(struct iris_bo *bo)
+ {
+    struct iris_bufmgr *bufmgr = bo->bufmgr;
+ 
+-   if (bo->external) {
++   if (bo->exported) {
+       assert(!bo->reusable);
+       return;
+    }
+ 
+    mtx_lock(&bufmgr->lock);
+-   iris_bo_make_external_locked(bo);
++   iris_bo_mark_exported_locked(bo);
+    mtx_unlock(&bufmgr->lock);
+ }
+ 
+@@ -1502,7 +1558,7 @@ iris_bo_export_dmabuf(struct iris_bo *bo, int *prime_fd)
+ {
+    struct iris_bufmgr *bufmgr = bo->bufmgr;
+ 
+-   iris_bo_make_external(bo);
++   iris_bo_mark_exported(bo);
+ 
+    if (drmPrimeHandleToFD(bufmgr->fd, bo->gem_handle,
+                           DRM_CLOEXEC | DRM_RDWR, prime_fd) != 0)
+@@ -1514,7 +1570,7 @@ iris_bo_export_dmabuf(struct iris_bo *bo, int *prime_fd)
+ uint32_t
+ iris_bo_export_gem_handle(struct iris_bo *bo)
+ {
+-   iris_bo_make_external(bo);
++   iris_bo_mark_exported(bo);
+ 
+    return bo->gem_handle;
+ }
+@@ -1532,7 +1588,7 @@ iris_bo_flink(struct iris_bo *bo, uint32_t *name)
+ 
+       mtx_lock(&bufmgr->lock);
+       if (!bo->global_name) {
+-         iris_bo_make_external_locked(bo);
++         iris_bo_mark_exported_locked(bo);
+          bo->global_name = flink.name;
+          _mesa_hash_table_insert(bufmgr->name_table, &bo->global_name, bo);
+       }
+diff --git a/src/gallium/drivers/iris/iris_bufmgr.h b/src/gallium/drivers/iris/iris_bufmgr.h
+index 7e666242f2d..6a5e4988739 100644
+--- a/src/gallium/drivers/iris/iris_bufmgr.h
++++ b/src/gallium/drivers/iris/iris_bufmgr.h
+@@ -223,10 +223,11 @@ struct iris_bo {
+     */
+    bool reusable;
+ 
+-   /**
+-    * Boolean of whether this buffer has been shared with an external client.
+-    */
+-   bool external;
++   /** Was this buffer imported from an external client? */
++   bool imported;
++
++   /** Has this buffer been exported to external clients? */
++   bool exported;
+ 
+    /**
+     * Boolean of whether this buffer is cache coherent
+@@ -348,15 +349,13 @@ int iris_bo_flink(struct iris_bo *bo, uint32_t *name);
+ static inline bool
+ iris_bo_is_external(const struct iris_bo *bo)
+ {
+-   return bo->external;
++   return bo->exported || bo->imported;
+ }
+ 
+ /**
+- * Make a BO externally accessible.
+- *
+- * \param bo Buffer to make external
++ * Mark a buffer as being shared with other external clients.
+  */
+-void iris_bo_make_external(struct iris_bo *bo);
++void iris_bo_mark_exported(struct iris_bo *bo);
+ 
+ /**
+  * Returns 1 if mapping the buffer for write could cause the process
+diff --git a/src/gallium/drivers/iris/iris_resource.c b/src/gallium/drivers/iris/iris_resource.c
+index 3b36af1b7d9..9adef05255f 100644
+--- a/src/gallium/drivers/iris/iris_resource.c
++++ b/src/gallium/drivers/iris/iris_resource.c
+@@ -930,7 +930,7 @@ iris_resource_create_for_buffer(struct pipe_screen *pscreen,
+    }
+ 
+    if (templ->bind & PIPE_BIND_SHARED) {
+-      iris_bo_make_external(res->bo);
++      iris_bo_mark_exported(res->bo);
+       res->base.is_shared = true;
+    }
+ 
+@@ -1027,7 +1027,7 @@ iris_resource_create_with_modifiers(struct pipe_screen *pscreen,
+    }
+ 
+    if (templ->bind & PIPE_BIND_SHARED) {
+-      iris_bo_make_external(res->bo);
++      iris_bo_mark_exported(res->bo);
+       res->base.is_shared = true;
+    }
+ 
+-- 
+2.36.1
+
