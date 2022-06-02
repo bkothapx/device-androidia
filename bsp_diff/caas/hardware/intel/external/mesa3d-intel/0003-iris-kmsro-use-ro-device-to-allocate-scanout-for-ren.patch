@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Chew, Tong Liang" <tong.liang.chew@intel.com>
+Date: Wed, 23 Jun 2021 05:15:35 +0800
+Subject: [PATCH] iris/kmsro: use ro device to allocate scanout for render
+ client
+
+Signed-off-by: Chew, Tong Liang <tong.liang.chew@intel.com>
+---
+ src/gallium/drivers/iris/iris_resource.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/src/gallium/drivers/iris/iris_resource.c b/src/gallium/drivers/iris/iris_resource.c
+index 9c296bfe7e8..1b30e41093a 100644
+--- a/src/gallium/drivers/iris/iris_resource.c
++++ b/src/gallium/drivers/iris/iris_resource.c
+@@ -989,11 +989,14 @@ iris_resource_create_with_modifiers(struct pipe_screen *pscreen,
+ {
+    struct iris_screen *screen = (struct iris_screen *)pscreen;
+    struct gen_device_info *devinfo = &screen->devinfo;
++   struct pipe_resource *pres;
+ 
+    if (screen->ro &&
+        (templ->bind & (PIPE_BIND_DISPLAY_TARGET |
+                        PIPE_BIND_SCANOUT | PIPE_BIND_SHARED))) {
+-      return iris_resource_create_renderonly(pscreen, templ);
++      pres = iris_resource_create_renderonly(pscreen, templ);
++      if (pres)
++	      return pres;
+    }
+ 
+    struct iris_resource *res = iris_alloc_resource(pscreen, templ);
+@@ -1410,8 +1413,8 @@ iris_resource_get_handle(struct pipe_screen *pscreen,
+    case WINSYS_HANDLE_TYPE_SHARED:
+       return iris_bo_flink(bo, &whandle->handle) == 0;
+    case WINSYS_HANDLE_TYPE_KMS: {
+-      if (screen->ro) {
+-         assert(res->scanout);
++      if (screen->ro && res->scanout) {
++         //assert(res->scanout);
+          return renderonly_get_handle(res->scanout, whandle);
+       }
+       /* Because we share the same drm file across multiple iris_screen, when
+-- 
+2.17.1
+

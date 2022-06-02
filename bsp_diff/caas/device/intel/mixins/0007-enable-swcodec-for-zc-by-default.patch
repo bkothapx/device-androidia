@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kalyan Alle <kalyan.alle@intel.com>
+Date: Mon, 13 Sep 2021 18:24:39 +0800
+Subject: [PATCH] enable-swcodec-for-zc-by-default
+
+---
+ groups/media/auto/auto_hal.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+diff --git a/groups/media/auto/auto_hal.in b/groups/media/auto/auto_hal.in
+index ea3813d..c305683 100644
+--- a/groups/media/auto/auto_hal.in
++++ b/groups/media/auto/auto_hal.in
+@@ -18,7 +18,7 @@ case "$(cat /proc/fb)" in
+                        setprop vendor.intel.video.codec hardware
+                 else
+                        echo "software codec"
+-                       setprop vendor.intel.video.codec hardware
++                       setprop vendor.intel.video.codec software
+                 fi
+                 ;;
+ esac
+-- 
+2.17.1
+

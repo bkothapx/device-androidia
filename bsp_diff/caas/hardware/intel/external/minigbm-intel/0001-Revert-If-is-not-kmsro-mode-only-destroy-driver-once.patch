@@ -1,0 +1,35 @@
+From 0576789f0a09f3591d379b93eb7602f0d27a9474 Mon Sep 17 00:00:00 2001
+From: "Kalenahally Madegowda, NandishaX"
+ <nandishax.kalenahally.madegowda@intel.com>
+Date: Wed, 23 Feb 2022 11:55:08 +0530
+Subject: [PATCH 1/2] Revert "If is not kmsro mode, only destroy driver once"
+
+This reverts commit bf23e63c2857f222cfba203a4421579577388569.
+
+diff --git a/cros_gralloc/cros_gralloc_driver.cc b/cros_gralloc/cros_gralloc_driver.cc
+index 4b94104..167bc6b 100644
+--- a/cros_gralloc/cros_gralloc_driver.cc
++++ b/cros_gralloc/cros_gralloc_driver.cc
+@@ -33,9 +33,6 @@ cros_gralloc_driver::~cros_gralloc_driver()
+ 	if (drv_kms_) {
+ 		int fd = drv_get_fd(drv_kms_);
+ 		drv_destroy(drv_kms_);
+-		if (!is_kmsro_enabled()) {
+-			drv_render_ = nullptr;
+-		}
+ 		drv_kms_ = nullptr;
+ 		close(fd);
+ 	}
+@@ -71,9 +68,6 @@ int32_t cros_gralloc_driver::init()
+ 	if (drv_kms_) {
+ 		int fd = drv_get_fd(drv_kms_);
+ 		drv_destroy(drv_kms_);
+-		if (!is_kmsro_enabled()) {
+-			drv_render_ = nullptr;
+-		}
+ 		drv_kms_ = nullptr;
+ 		close(fd);
+ 	}
+-- 
+2.35.1
+
