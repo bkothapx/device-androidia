@@ -1,0 +1,39 @@
+From f86214c164b96c14d403d887fa6736087737db3a Mon Sep 17 00:00:00 2001
+From: "Suresh, Prashanth" <prashanth.suresh@intel.com>
+Date: Thu, 2 Jun 2022 23:24:44 +0530
+Subject: [PATCH] Add start_civ.sh to release files.
+
+Tracked-On: OAM-102239
+Signed-off-by: Suresh, Prashanth <prashanth.suresh@intel.com>
+---
+ groups/device-specific/caas/BoardConfig.mk | 1 +
+ groups/device-specific/caas/product.mk     | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/groups/device-specific/caas/BoardConfig.mk b/groups/device-specific/caas/BoardConfig.mk
+index c107326..5f32230 100644
+--- a/groups/device-specific/caas/BoardConfig.mk
++++ b/groups/device-specific/caas/BoardConfig.mk
+@@ -15,6 +15,7 @@ BOARD_FLASHFILES += $(PRODUCT_OUT)/LICENSE
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/start_flash_usb.sh
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/auto_switch_pt_usb_vms.sh
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/findall.py
++BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/start_civ.sh
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/setup_host.sh
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/sof_audio/configure_sof.sh
+ BOARD_FLASHFILES += $(PRODUCT_OUT)/scripts/setup_audio_host.sh
+diff --git a/groups/device-specific/caas/product.mk b/groups/device-specific/caas/product.mk
+index 72d368f..4bcec4b 100755
+--- a/groups/device-specific/caas/product.mk
++++ b/groups/device-specific/caas/product.mk
+@@ -52,6 +52,7 @@ PRODUCT_COPY_FILES += $(LOCAL_PATH)/setup_audio_host.sh:$(PRODUCT_OUT)/scripts/s
+ PRODUCT_COPY_FILES += $(LOCAL_PATH)/guest_pm_control:$(PRODUCT_OUT)/scripts/guest_pm_control
+ PRODUCT_COPY_FILES += $(LOCAL_PATH)/intel-thermal-conf.xml:$(PRODUCT_OUT)/scripts/intel-thermal-conf.xml
+ PRODUCT_COPY_FILES += $(LOCAL_PATH)/thermald.service:$(PRODUCT_OUT)/scripts/thermald.service
++PRODUCT_COPY_FILES += device/intel/civ/host/vm-manager/scripts/start_civ.sh:$(PRODUCT_OUT)/scripts/start_civ.sh
+ PRODUCT_COPY_FILES += device/intel/civ/host/vm-manager/scripts/setup_host.sh:$(PRODUCT_OUT)/scripts/setup_host.sh
+ PRODUCT_COPY_FILES += device/intel/civ/host/vm-manager/scripts/guest_time_keeping.sh:$(PRODUCT_OUT)/scripts/guest_time_keeping.sh
+ PRODUCT_COPY_FILES += device/intel/civ/host/vm-manager/scripts/start_flash_usb.sh:$(PRODUCT_OUT)/scripts/start_flash_usb.sh
+-- 
+2.36.1
+
