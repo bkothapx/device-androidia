@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Basil Chew <basil.chew@intel.com>
+Date: Thu, 28 Apr 2022 18:37:26 +0800
+Subject: [PATCH] Update to QEMU 6.2
+
+Change:
+- updated setup_host.sh to install QEMU 6.2
+---
+ scripts/setup_host.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/setup_host.sh b/scripts/setup_host.sh
+index d6a7a61..eb94130 100755
+--- a/scripts/setup_host.sh
++++ b/scripts/setup_host.sh
+@@ -9,7 +9,7 @@ set -eE
+ 
+ #---------      Global variable     -------------------
+ reboot_required=0
+-QEMU_REL="qemu-6.0.0"
++QEMU_REL="qemu-6.2.0"
+ CIV_WORK_DIR=$(pwd)
+ CIV_GOP_DIR=$CIV_WORK_DIR/GOP_PKG
+ CIV_VERTICAl_DIR=$CIV_WORK_DIR/vertical_patches/host
+-- 
+2.17.1
+
