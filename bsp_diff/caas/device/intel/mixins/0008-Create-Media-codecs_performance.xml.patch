@@ -1,34 +1,31 @@
-From e2f63211d7eff4333a2c8d1465cb441b4b315f69 Mon Sep 17 00:00:00 2001
+From 8f9df8885374994fbcce2907a45019ea40839b09 Mon Sep 17 00:00:00 2001
 From: "Suresh, Prashanth" <prashanth.suresh@intel.com>
 Date: Wed, 11 May 2022 15:59:47 +0530
 Subject: [PATCH] Create Media codecs_performance.xml
 
 Tracked-On: GFXSRIOV-218
 ---
- groups/codecs/configurable/auto_hal.in        |   6 +
+ groups/codecs/configurable/auto_hal.in        |   3 +
  groups/codecs/configurable/files.spec         |   1 +
  .../media_codecs_performance_adl.xml          | 191 ++++++++++++++++++
  groups/codecs/configurable/product.mk         |   3 +-
- 4 files changed, 200 insertions(+), 1 deletion(-)
- create mode 100755 groups/codecs/configurable/media_codecs_performance_adl.xml
+ 4 files changed, 197 insertions(+), 1 deletion(-)
+ create mode 100644 groups/codecs/configurable/media_codecs_performance_adl.xml
 
 diff --git a/groups/codecs/configurable/auto_hal.in b/groups/codecs/configurable/auto_hal.in
-index eab9dfb..281a348 100644
+index 2d96b50..281a348 100644
 --- a/groups/codecs/configurable/auto_hal.in
 +++ b/groups/codecs/configurable/auto_hal.in
-@@ -9,6 +9,12 @@ if [ $value_model == 166 ]; then
+@@ -9,6 +9,9 @@ if [ $value_model == 166 ]; then
  elif [ $value_model == 141 ]; then
      setprop ro.vendor.media.target_variant "_gen12"
      setprop ro.vendor.media.target_variant_platform "_tgl"
 +elif [ $value_model == 151 ]; then
 +    setprop ro.vendor.media.target_variant "_gen12"
 +    setprop ro.vendor.media.target_variant_platform "_adl"
-+elif [ $value_model == 154 ]; then
-+    setprop ro.vendor.media.target_variant "_gen12"
-+    setprop ro.vendor.media.target_variant_platform "_adl"
- else
-     :
- fi
+ elif [ $value_model == 154 ]; then
+     setprop ro.vendor.media.target_variant "_gen12"
+     setprop ro.vendor.media.target_variant_platform "_adl"
 diff --git a/groups/codecs/configurable/files.spec b/groups/codecs/configurable/files.spec
 index e462830..ec3ea24 100644
 --- a/groups/codecs/configurable/files.spec
@@ -42,8 +39,8 @@ index e462830..ec3ea24 100644
  media_codecs_vp9.xml: "vp9 support"
  mfx_omxil_core_vp9.conf: "vp9 support"
 diff --git a/groups/codecs/configurable/media_codecs_performance_adl.xml b/groups/codecs/configurable/media_codecs_performance_adl.xml
-new file mode 100755
-index 0000000..fd5145c
+new file mode 100644
+index 0000000..b3d9f50
 --- /dev/null
 +++ b/groups/codecs/configurable/media_codecs_performance_adl.xml
 @@ -0,0 +1,191 @@
@@ -238,7 +235,6 @@ index 0000000..fd5145c
 +        </MediaCodec>
 +    </Encoders>
 +</MediaCodecs>
-+
 diff --git a/groups/codecs/configurable/product.mk b/groups/codecs/configurable/product.mk
 index fd27bc4..b12eee3 100644
 --- a/groups/codecs/configurable/product.mk
@@ -254,5 +250,5 @@ index fd27bc4..b12eee3 100644
  {{/codec_perf_xen}}
  
 -- 
-2.36.1
+2.37.0
 
