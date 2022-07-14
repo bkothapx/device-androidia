@@ -1,21 +1,20 @@
-From 450d3260f36e647b8952570c54a281e288e742f7 Mon Sep 17 00:00:00 2001
-From: kalle <kalyan.alle@intel.com>
-Date: Thu, 13 Jan 2022 15:30:31 +0800
+From 663a13a26a29749b300d8bb2892640c3e0c91656 Mon Sep 17 00:00:00 2001
+From: "Kothapeta, BikshapathiX" <bikshapathix.kothapeta@intel.com>
+Date: Thu, 14 Jul 2022 09:45:32 +0530
 Subject: [PATCH] libdrm chanes to support rpl-s platform
 
----
- intel/i915_pciids.h   | 11 +++++++++++
- intel/intel_chipset.c |  1 +
- 2 files changed, 12 insertions(+)
+Tracked-On:
+Signed-off-by: kalle <kalyan.alle@intel.com>
+Signed-off-by: Kothapeta, BikshapathiX <bikshapathix.kothapeta@intel.com>
 
 diff --git a/intel/i915_pciids.h b/intel/i915_pciids.h
-index c7cdbfc4..43c3302c 100644
+index c00ac546..03ad7105 100644
 --- a/intel/i915_pciids.h
 +++ b/intel/i915_pciids.h
-@@ -505,4 +505,15 @@
- 	INTEL_VGA_DEVICE(0x4551, info), \
- 	INTEL_VGA_DEVICE(0x4541, info)
- 
+@@ -665,5 +665,15 @@
+ 	INTEL_VGA_DEVICE(0x46C1, info), \
+ 	INTEL_VGA_DEVICE(0x46C2, info), \
+ 	INTEL_VGA_DEVICE(0x46C3, info)
 +/* RPL-S */
 +#define INTEL_RPLS_IDS(info) \
 +	INTEL_VGA_DEVICE(0xA780, info), \
@@ -26,10 +25,10 @@ index c7cdbfc4..43c3302c 100644
 +	INTEL_VGA_DEVICE(0xA789, info), \
 +	INTEL_VGA_DEVICE(0xA78A, info), \
 +	INTEL_VGA_DEVICE(0xA78B, info)
-+
+ 
  #endif /* _I915_PCIIDS_H */
 diff --git a/intel/intel_chipset.c b/intel/intel_chipset.c
-index 5aa4a2f2..0570ba2b 100644
+index f0da6d81..a0952b76 100644
 --- a/intel/intel_chipset.c
 +++ b/intel/intel_chipset.c
 @@ -35,6 +35,7 @@ static const struct pci_device {
@@ -37,9 +36,9 @@ index 5aa4a2f2..0570ba2b 100644
  } pciids[] = {
  	/* Keep ids sorted by gen; latest gen first */
 +	INTEL_RPLS_IDS(12),
- 	INTEL_ICL_11_IDS(11),
- 	INTEL_CNL_IDS(10),
- 	INTEL_CFL_IDS(9),
+ 	INTEL_ADLP_IDS(12),
+ 	INTEL_ADLS_IDS(12),
+ 	INTEL_RKL_IDS(12),
 -- 
-2.17.1
+2.37.1
 
