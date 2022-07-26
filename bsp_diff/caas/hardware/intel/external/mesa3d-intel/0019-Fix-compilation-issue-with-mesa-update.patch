@@ -1,0 +1,27 @@
+From 2aca56e9cff26c3ad64700f46b84c76cee19d902 Mon Sep 17 00:00:00 2001
+From: "Kothapeta, BikshapathiX" <bikshapathix.kothapeta@intel.com>
+Date: Mon, 30 May 2022 15:55:02 +0530
+Subject: [PATCH 20/20] Fix compilation issue with mesa update.
+
+isl_aux_usage_has_compression(res->aux.usage) not define
+error with mesa update is fixed
+
+Tracked-On:
+Signed-off-by: Kothapeta, BikshapathiX <bikshapathix.kothapeta@intel.com>
+
+diff --git a/src/gallium/drivers/iris/iris_resource.c b/src/gallium/drivers/iris/iris_resource.c
+index 72cd63f0e82..97935d6fa67 100644
+--- a/src/gallium/drivers/iris/iris_resource.c
++++ b/src/gallium/drivers/iris/iris_resource.c
+@@ -2066,7 +2066,7 @@ iris_transfer_map(struct pipe_context *ctx,
+        * and we aren't doing an uncached read.
+        */
+       if (!map_would_stall &&
+-          !isl_aux_usage_has_compression(res->aux.usage) &&
++          //!isl_aux_usage_has_compression(res->aux.usage) &&
+           !((usage & PIPE_MAP_READ) && res->bo->mmap_mode != IRIS_MMAP_WB)) {
+          usage |= PIPE_MAP_DIRECTLY;
+       }
+-- 
+2.36.1
+

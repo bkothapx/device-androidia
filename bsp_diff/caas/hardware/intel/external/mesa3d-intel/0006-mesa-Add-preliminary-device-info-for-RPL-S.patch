@@ -1,0 +1,78 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: "Mazlan, Hazwan Arif" <hazwan.arif.mazlan@intel.com>
+Date: Tue, 28 Dec 2021 23:51:22 +0800
+Subject: [PATCH] mesa: Add preliminary device info for RPL-S
+
+Signed-off-by: Sodhi, Vunny <vunny.sodhi@intel.com>
+Rebased-by: Mazlan, Hazwan Arif <hazwan.arif.mazlan@intel.com>
+Rebased-by: Basil Chew <basil.chew@intel.com>
+---
+ include/pci_ids/iris_pci_ids.h  |  9 +++++++++
+ src/intel/dev/gen_device_info.c | 11 +++++++++++
+ src/intel/dev/gen_device_info.h |  1 +
+ 3 files changed, 21 insertions(+)
+
+diff --git a/include/pci_ids/iris_pci_ids.h b/include/pci_ids/iris_pci_ids.h
+index 1e8c433b491..8c36cfcc3cb 100644
+--- a/include/pci_ids/iris_pci_ids.h
++++ b/include/pci_ids/iris_pci_ids.h
+@@ -36,6 +36,15 @@ CHIPSET(0x46c1, adl_gt2, "ADL GT2", "Intel(R) Graphics")
+ CHIPSET(0x46c2, adl_gt2, "ADL GT2", "Intel(R) Graphics")
+ CHIPSET(0x46c3, adl_gt2, "ADL GT2", "Intel(R) Graphics")
+ 
++CHIPSET(0xA780, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA781, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA782, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA783, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA788, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA789, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA78A, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++CHIPSET(0xA78B, rpl_gt1, "RPL-S GT1", "Intel(R) Graphics")
++
+ CHIPSET(0x9A40, tgl_gt2, "TGL GT2", "Intel(R) Xe Graphics")
+ CHIPSET(0x9A49, tgl_gt2, "TGL GT2", "Intel(R) Xe Graphics")
+ CHIPSET(0x9A59, tgl_gt2, "TGL GT2", "Intel(R) Graphics")
+diff --git a/src/intel/dev/gen_device_info.c b/src/intel/dev/gen_device_info.c
+index 1987a6bd327..564d8606d2f 100644
+--- a/src/intel/dev/gen_device_info.c
++++ b/src/intel/dev/gen_device_info.c
+@@ -65,6 +65,7 @@ static const struct {
+    { "rkl", 0x4c8a },
+    { "dg1", 0x4905 },
+    { "adl", 0x4680 },
++   { "rpl", 0xa780 },
+ };
+ 
+ /**
+@@ -994,6 +995,16 @@ static const struct gen_device_info gen_device_info_adl_gt2 = {
+    .is_alderlake = true,
+ };
+ 
++static const struct gen_device_info gen_device_info_rpl_gt05 = {
++   GFX12_GT05_FEATURES,
++   .is_rapterlake = true,
++};
++
++static const struct gen_device_info gen_device_info_rpl_gt1 = {
++   GFX12_GT_FEATURES(1),
++   .is_rapterlake = true,
++};
++
+ #define GFX12_DG1_FEATURES                      \
+    GFX12_GT_FEATURES(2),                        \
+    .is_dg1 = true,                              \
+diff --git a/src/intel/dev/gen_device_info.h b/src/intel/dev/gen_device_info.h
+index fe5ac11a388..4e04d5d82ae 100644
+--- a/src/intel/dev/gen_device_info.h
++++ b/src/intel/dev/gen_device_info.h
+@@ -68,6 +68,7 @@ struct gen_device_info
+    bool is_rocketlake;
+    bool is_dg1;
+    bool is_alderlake;
++   bool is_rapterlake;
+ 
+    bool has_hiz_and_separate_stencil;
+    bool must_use_separate_stencil;
+-- 
+2.17.1
+

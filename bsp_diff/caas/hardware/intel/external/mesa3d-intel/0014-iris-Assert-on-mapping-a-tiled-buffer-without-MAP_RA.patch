@@ -1,0 +1,30 @@
+From 2a48408755bc6c278c3e0dec0c930ab3cebccf30 Mon Sep 17 00:00:00 2001
+From: Kenneth Graunke <kenneth@whitecape.org>
+Date: Thu, 20 May 2021 00:46:30 -0700
+Subject: [PATCH 08/20] iris: Assert on mapping a tiled buffer without MAP_RAW
+
+iris has never relied on detiled maps using hardware fences.
+This code is a remnant of i965, where that was actually used.
+
+We can just assert that callers don't do such a thing.
+
+Acked-by: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/10941>
+
+diff --git a/src/gallium/drivers/iris/iris_bufmgr.c b/src/gallium/drivers/iris/iris_bufmgr.c
+index f9e6c712002..175484335e2 100644
+--- a/src/gallium/drivers/iris/iris_bufmgr.c
++++ b/src/gallium/drivers/iris/iris_bufmgr.c
+@@ -1211,8 +1211,7 @@ void *
+ iris_bo_map(struct pipe_debug_callback *dbg,
+             struct iris_bo *bo, unsigned flags)
+ {
+-   if (bo->tiling_mode != I915_TILING_NONE && !(flags & MAP_RAW))
+-      return iris_bo_map_gtt(dbg, bo, flags);
++   assert((flags & MAP_RAW) || bo->tiling_mode == I915_TILING_NONE);
+ 
+    void *map;
+ 
+-- 
+2.36.1
+
