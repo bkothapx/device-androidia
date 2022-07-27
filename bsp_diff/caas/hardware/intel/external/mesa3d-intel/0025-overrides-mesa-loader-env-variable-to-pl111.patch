@@ -1,0 +1,41 @@
+From f595362da1081d1808d76512d71b22be8e08a75e Mon Sep 17 00:00:00 2001
+From: Kalyan Alle <kalyan.alle@intel.com>
+Date: Wed, 6 Jul 2022 00:48:20 +0530
+Subject: [PATCH 6/6] overrides mesa loader env variable to pl111
+
+pl111 driver support is needed for kmsro to work.
+
+Tracked-On: OAM-102839
+Signed-of-by: Shekhar Chauhan <shekhar.chauhan@intel.com>
+---
+ Android.mk          | 1 +
+ src/loader/loader.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Android.mk b/Android.mk
+index 6cf40263b1a..e92eb8e1381 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -71,6 +71,7 @@ gallium_drivers := \
+ 	lima.HAVE_GALLIUM_LIMA \
+ 	panfrost.HAVE_GALLIUM_PANFROST
+ 
++BOARD_GPU_DRIVERS =: i965 virgl iris kmsro
+ ifeq ($(BOARD_GPU_DRIVERS),all)
+ MESA_BUILD_CLASSIC := $(filter HAVE_%, $(subst ., , $(classic_drivers)))
+ MESA_BUILD_GALLIUM := $(filter HAVE_%, $(subst ., , $(gallium_drivers)))
+diff --git a/src/loader/loader.c b/src/loader/loader.c
+index d64bc7c10f2..9023ab022bc 100644
+--- a/src/loader/loader.c
++++ b/src/loader/loader.c
+@@ -458,6 +458,7 @@ loader_get_pci_driver(int fd)
+    }
+ 
+ out:
++   driver = strdup("pl111");
+    log_(driver ? _LOADER_DEBUG : _LOADER_WARNING,
+          "pci id for fd %d: %04x:%04x, driver %s\n",
+          fd, vendor_id, chip_id, driver);
+-- 
+2.17.1
+
