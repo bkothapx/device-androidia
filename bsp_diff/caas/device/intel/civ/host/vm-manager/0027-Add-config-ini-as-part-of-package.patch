@@ -51,7 +51,7 @@ index 0000000..4409637
 +        sed -i "/^\[aaf\]$/,/^\[/ s#^path.*#path=$CIV_WORK_DIR/scripts/aaf#" $USER_HOME/.intel/.civ/civ-sriov.ini
 +        sed -i "/^\[aaf\]$/,/^\[/ s#^support_suspend.*#support_suspend=disable#" $USER_HOME/.intel/.civ/civ-sriov.ini
 +
-+        sed -i "/^\[passthrough\]$/,/^\[/ s/^passthrough_pci/#passthrough_pci=/" $USER_HOME/.intel/.civ/civ-sriov.ini
++        sed -i "/^\[passthrough\]$/,/^\[/ s/^passthrough_pci/#passthrough_pci/" $USER_HOME/.intel/.civ/civ-sriov.ini
 +}
 +
 +function copy_civ_ini() {
