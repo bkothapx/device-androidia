@@ -1,0 +1,49 @@
+From 9210fc0a3b61c396ba9b32467b88c89d41bc9fe7 Mon Sep 17 00:00:00 2001
+From: Christian Schoenebeck <linux_oss@crudebyte.com>
+Date: Sat, 4 Sep 2021 17:07:12 +0200
+Subject: [PATCH] net/9p: use macro to define default msize
+
+Use a macro to define the default value for the 'msize' option
+at one place instead of using two separate integer literals.
+
+Link: http://lkml.kernel.org/r/28bb651ae0349a7d57e8ddc92c1bd5e62924a912.1630770829.git.linux_oss@crudebyte.com
+Signed-off-by: Christian Schoenebeck <linux_oss@crudebyte.com>
+Signed-off-by: Dominique Martinet <asmadeus@codewreck.org>
+---
+ net/9p/client.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/net/9p/client.c b/net/9p/client.c
+index b7b958f61faf..1cb255587fff 100644
+--- a/net/9p/client.c
++++ b/net/9p/client.c
+@@ -30,6 +30,8 @@
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/9p.h>
+ 
++#define DEFAULT_MSIZE 8192
++
+ /*
+   * Client Option Parsing (code inspired by NFS code)
+   *  - a little lazy - parse all client options
+@@ -65,7 +67,7 @@ EXPORT_SYMBOL(p9_is_proto_dotu);
+ 
+ int p9_show_client_options(struct seq_file *m, struct p9_client *clnt)
+ {
+-	if (clnt->msize != 8192)
++	if (clnt->msize != DEFAULT_MSIZE)
+ 		seq_printf(m, ",msize=%u", clnt->msize);
+ 	seq_printf(m, ",trans=%s", clnt->trans_mod->name);
+ 
+@@ -139,7 +141,7 @@ static int parse_opts(char *opts, struct p9_client *clnt)
+ 	int ret = 0;
+ 
+ 	clnt->proto_version = p9_proto_2000L;
+-	clnt->msize = 8192;
++	clnt->msize = DEFAULT_MSIZE;
+ 
+ 	if (!opts)
+ 		return 0;
+-- 
+2.35.2
+
