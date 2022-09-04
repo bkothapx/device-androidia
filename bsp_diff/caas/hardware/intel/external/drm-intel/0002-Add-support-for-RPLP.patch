@@ -41,8 +41,8 @@ index 0570ba2b..f349e411 100644
  	/* Keep ids sorted by gen; latest gen first */
 +	INTEL_RPLP_IDS(12),
  	INTEL_RPLS_IDS(12),
- 	INTEL_ICL_11_IDS(11),
- 	INTEL_CNL_IDS(10),
+ 	INTEL_ADLP_IDS(12),
+ 	INTEL_ADLS_IDS(12),
 diff --git a/xf86drm.h b/xf86drm.h
 index 3fb1d1ca..ebfe77f7 100644
 --- a/xf86drm.h
