@@ -1,0 +1,30 @@
+From 383f566cd6af59ccc7570329c8bdf01e1437c3a8 Mon Sep 17 00:00:00 2001
+From: vdanix <vishwanathx.dani@intel.com>
+Date: Mon, 12 Sep 2022 18:17:47 +0530
+Subject: [PATCH] Fix for CtsDeqpTestCases in user build
+
+Tests are filing with :
+avc: denied { read } for name="vulkan.pastel.so"
+
+Most of below tests are failing.
+dEQP-VK.info.*
+dEQP-VK.api.*
+
+Tracked-On: OAM-103870
+Signed-off-by: vdanix <vishwanathx.dani@intel.com>
+
+diff --git a/graphics/mesa/file_contexts b/graphics/mesa/file_contexts
+index a127735..86a77f9 100644
+--- a/graphics/mesa/file_contexts
++++ b/graphics/mesa/file_contexts
+@@ -29,6 +29,7 @@
+ /(vendor|system/vendor)/lib(64)?/dri/virtio_gpu_dri\.so u:object_r:same_process_hal_file:s0
+ /(vendor|system/vendor)/lib(64)?/dri/gallium_dri\.so u:object_r:same_process_hal_file:s0
+ /(vendor|system/vendor)/lib(64)?/hw/vulkan\.intel\.so u:object_r:same_process_hal_file:s0
++/(vendor|system/vendor)/lib(64)?/hw/vulkan\.pastel\.so  u:object_r:same_process_hal_file:s0
+ /(vendor|system/vendor)/lib(64)?/dri/libgallium_dri\.so u:object_r:same_process_hal_file:s0
+ /(vendor|system/vendor)/lib(64)?/libmd\.so u:object_r:same_process_hal_file:s0
+ /(vendor|system/vendor)/lib(64)?/egl/libEGL_swiftshader\.so u:object_r:same_process_hal_file:s0
+-- 
+2.37.3
+
