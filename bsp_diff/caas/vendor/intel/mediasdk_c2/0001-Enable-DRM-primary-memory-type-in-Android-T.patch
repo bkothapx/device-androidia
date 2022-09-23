@@ -1,0 +1,31 @@
+From e717e36f96bd499fde9449ff23c7af03a71073b2 Mon Sep 17 00:00:00 2001
+From: xinminmx <minminx.xin@intel.com>
+Date: Wed, 24 Aug 2022 12:31:05 +0800
+Subject: [PATCH 1/4] Enable DRM primary memory type in Android T
+
+Enable DRM primary memory type in codec2.0
+
+Tracked-On: OAM-103647
+Signed-off-by: xinminmx <minminx.xin@intel.com>
+
+diff --git a/mfx_c2_defs.mk b/mfx_c2_defs.mk
+index 2cce95e..4722bc5 100644
+--- a/mfx_c2_defs.mk
++++ b/mfx_c2_defs.mk
+@@ -42,12 +42,7 @@ MFX_C2_CFLAGS += \
+ 
+ ifeq ($(BOARD_USES_GRALLOC1),true)
+   # plugins should use PRIME buffer descriptor since Android P
+-  ifneq ($(filter MFX_S ,$(MFX_ANDROID_VERSION)),)
+-      MFX_C2_CFLAGS += -DMFX_C2_USE_PRIME
+-  endif
+-  ifneq ($(filter MFX_R ,$(MFX_ANDROID_VERSION)),)
+-      MFX_C2_CFLAGS += -DMFX_C2_USE_PRIME
+-  endif
++  MFX_C2_CFLAGS += -DMFX_C2_USE_PRIME
+ else
+   $(error "Required GRALLOC1 support")
+ endif
+-- 
+2.37.3
+

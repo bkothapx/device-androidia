@@ -1,0 +1,40 @@
+From 6a290a7dcb0100fc44bbef3b76d437c73894bfee Mon Sep 17 00:00:00 2001
+From: zhangyichix <yichix.zhang@intel.com>
+Date: Wed, 31 Aug 2022 16:19:08 +0800
+Subject: [PATCH 3/4] [c2][decoder] Fixed av1 color aspect issue
+
+cases:
+android.mediav2.cts.DecoderColorAspectsTest[2(c2.intel.av1.decoder_video/av01_1_2_4)]
+android.mediav2.cts.DecoderColorAspectsTest[10(c2.intel.av1.decoder_video/av01_1_8_1)]
+android.mediav2.cts.DecoderColorAspectsTest[14(c2.intel.av1.decoder_video/av01_1_6_7)]
+
+MSDK doesn't specify the color aspect for av1 so far.
+
+Tracked-On: OAM-103721
+Signed-off-by: zhangyichix <yichix.zhang@intel.com>
+
+diff --git a/c2_utils/src/mfx_c2_color_aspects_wrapper.cpp b/c2_utils/src/mfx_c2_color_aspects_wrapper.cpp
+index 3c94188..5320a4a 100755
+--- a/c2_utils/src/mfx_c2_color_aspects_wrapper.cpp
++++ b/c2_utils/src/mfx_c2_color_aspects_wrapper.cpp
+@@ -78,7 +78,7 @@ void MfxC2ColorAspectsWrapper::UpdateBitstreamColorAspects(const mfxExtVideoSign
+                                             signalInfo.VideoFullRange != 0 ||
+                                             signalInfo.ColourDescriptionPresent != 0;
+ 
+-    if (MFX_CODEC_VP9 == m_uCodecId || MFX_CODEC_VP8 == m_uCodecId)
++    if (MFX_CODEC_VP9 == m_uCodecId || MFX_CODEC_VP8 == m_uCodecId || MFX_CODEC_AV1 == m_uCodecId)
+     {
+         video_signal_type_present_flag = false;
+     }
+@@ -156,7 +156,7 @@ void MfxC2ColorAspectsWrapper::GetColorAspectsFromVideoSignal(const mfxExtVideoS
+                                             signalInfo.VideoFullRange != 0 ||
+                                             signalInfo.ColourDescriptionPresent != 0;
+ 
+-    if (MFX_CODEC_VP9 == m_uCodecId || MFX_CODEC_VP8 == m_uCodecId)
++    if (MFX_CODEC_VP9 == m_uCodecId || MFX_CODEC_VP8 == m_uCodecId || MFX_CODEC_AV1 == m_uCodecId)
+     {
+         // No video signal info present in vpx bitstream.
+         video_signal_type_present_flag = false;
+-- 
+2.37.3
+
